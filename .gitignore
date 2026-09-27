@@ -3,7 +3,12 @@ out/
 *.obj
 *.pdb
 *.ilk
+*.exe
+*.exp
+*.lib
 .vs/
+.cache/
 CMakeUserPresets.json
 READ.md
 imp.txt
+new.md
