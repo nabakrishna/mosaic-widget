@@ -23,3 +23,6 @@ stack, driven directly.
 ## digram
 ![Mosaic Architecture](results/arch-mosaic.svg)
 
+## final look
+![mosaic look](results\final_look.png)
+![mosaic seetings panel look](results\settings_panel.png)
