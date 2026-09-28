@@ -48,7 +48,7 @@ struct ThemeTypography {
     std::wstring fontFamily = L"Segoe UI Variable Display";
     std::wstring fontFamilyFallback = L"Segoe UI";
 
-    float sizeGreetingName = 22.0f;
+    float sizeGreetingName = 28.0f;
     float sizeGreetingSub  = 13.0f;
     float sizeDateDay      = 13.0f;
     float sizeDateFull     = 20.0f;
