@@ -1,3 +1,5 @@
+
+# #new code on date 27-09-2026------------------------------------------------------------------
 # cmake_minimum_required(VERSION 3.20)#version 3.21 is not supported by the default Visual Studio 2022 installation, so we use 3.20 to avoid requiring users to install a newer CMake version than they already have.
 # project(Mosaic LANGUAGES C CXX)
 
@@ -146,6 +148,15 @@
 #     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 # )
 
+# # --- Tests (opt-in) ---------------------------------------------------------
+# # Off by default so a normal `cmake --build` for the app itself never pays
+# # for a GoogleTest download it doesn't need. Enable explicitly with
+# # -DMOSAIC_BUILD_TESTS=ON (CI does this — see .github/workflows/build.yml).
+# option(MOSAIC_BUILD_TESTS "Build Mosaic's unit test suite (fetches GoogleTest)" OFF)
+# if(MOSAIC_BUILD_TESTS)
+#     enable_testing()
+#     add_subdirectory(tests)
+# endif()
 
 
 
@@ -155,9 +166,13 @@
 
 
 
-#new code on date 27-09-2026------------------------------------------------------------------
+
+
+
+
+#new code with versioning
 cmake_minimum_required(VERSION 3.20)#version 3.21 is not supported by the default Visual Studio 2022 installation, so we use 3.20 to avoid requiring users to install a newer CMake version than they already have.
-project(Mosaic LANGUAGES C CXX)
+project(Mosaic VERSION 1.0.0 LANGUAGES C CXX)
 
 if(NOT WIN32)
     message(FATAL_ERROR "Mosaic is a native Windows application and must be built on Windows with the MSVC toolchain.")
@@ -263,6 +278,12 @@ add_executable(Mosaic WIN32
 
 target_include_directories(Mosaic PRIVATE src)
 
+# Exposes the version set in project() above to C++ as a plain string
+# literal, so DrawAbout() (src/ui/SettingsPanel.cpp) shows the real build
+# version instead of a second, separately maintained hardcoded string that
+# could silently drift out of sync with this file.
+target_compile_definitions(Mosaic PRIVATE MOSAIC_VERSION_STRING="${PROJECT_VERSION}")
+
 # Older Windows SDKs (pre-C++/WinRT 2.0) ship a version of the WinRT
 # headers whose <winrt/base.h> still pulls in <experimental/coroutine>,
 # which recent MSVC only compiles under the legacy /await flag. A current
@@ -313,4 +334,3 @@ if(MOSAIC_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
-
