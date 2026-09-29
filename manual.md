@@ -178,3 +178,7 @@ otherwise CMake attempts to fetch it during configuration.
     ```
     Windows Defender SmartScreen: A blue or grey pop-up saying "Windows protected your PC" with a message that an unrecognized app started and might put your PC at risk. This happens because the developer did not sign the .exe with a verified digital certificate.
     ```
+
+## limitations
+1. On Windows 11 24H2 and later, the "Show Desktop" gesture (Win+D or a three-finger swipe down on precision touchpads) can temporarily cover the widget until you swipe up or click back into it
+2. Quick Notes encryption is tied to your Windows user account — anyone already signed in to that account can still open locked notes; a Windows account with a strong sign-in is the actual security boundary
