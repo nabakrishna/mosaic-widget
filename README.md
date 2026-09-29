@@ -61,6 +61,12 @@ Notes use Windows data protection and are tied to your Windows account.
 ![mosaic look](results/final_look.png)
 ![Mosaic settings panel](results/settings_panel.png)
 
+## limitations
+1. On Windows 11 24H2 and later, the "Show Desktop" gesture (Win+D or a three-finger swipe down on precision touchpads) can temporarily cover the widget until you swipe up or click back into it
+2. Quick Notes encryption is tied to your Windows user account — anyone already signed in to that account can still open locked notes; a Windows account with a strong sign-in is the actual security boundary
+
+For more details, see the [Drawbacks section in the manual](manual.md#drawbacks).
+
 ## License
 
 See [LICENSE](LICENSE).
