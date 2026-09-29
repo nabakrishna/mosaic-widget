@@ -12,5 +12,5 @@ CMakeUserPresets.json
 READ.md
 imp.txt
 new.md
-results\desktop.ini
-results\image_test.png
+results/desktop.ini
+results/image_test.png
