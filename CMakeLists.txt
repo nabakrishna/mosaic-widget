@@ -243,6 +243,7 @@ endif()
 # --- Mosaic itself ---------------------------------------------------------
 add_executable(Mosaic WIN32
     src/main.cpp
+    resources/app.rc
     src/app/Application.cpp
     src/app/AppSettings.cpp
     src/platform/Window.cpp
