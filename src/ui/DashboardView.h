@@ -134,6 +134,11 @@ private:
 
     components::IconButton m_gearButton;
 
+    //----new golbal var---------------------------------------
+    bool m_isWindowLocked = false;
+    D2D1_RECT_F m_pinWindowHitbox{};
+    //---------------------------------------------------------------
+
     // --- layout state ------------------------------------------------
     layout::LayoutEngine m_layoutEngine;
     layout::LayoutConstraints m_constraints; // fixed 6 columns — see GridTypes.h
