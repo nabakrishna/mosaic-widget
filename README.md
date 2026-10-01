@@ -12,9 +12,8 @@
 
 A native Win32 + Direct2D + DirectComposition dashboard shell. No Electron,
 no browser runtime, no third-party UI framework — just the Windows graphics
-stack, driven directly.
-</br>
-Mosaic does not use Electron, a browser runtime, or a cross-platform UI toolkit. Its rendering and window management are built directly on the Windows graphics stack.
+stack, driven directly.<br>
+Mosaic provides a compact desktop workspace for tasks, photos, activities, pinned items, and quick notes. It is designed to integrate directly with the Windows desktop rather than relying on an embedded browser or third-party UI framework.
 
 ## Features
 
