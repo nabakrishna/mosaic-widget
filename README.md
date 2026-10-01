@@ -1,15 +1,7 @@
 # Mosaic
-<p align="">
+<p align="center">
    <img src="resources/icons/app.ico" alt="Mosaic app icon" width="112">
 </p>
-
-A native Win32 + Direct2D + DirectComposition dashboard shell. No Electron,
-no browser runtime, no third-party UI framework — just the Windows graphics
-stack, driven directly.
-</br>
-Mosaic does not use Electron, a browser runtime, or a cross-platform UI toolkit. Its rendering and window management are built directly on the Windows graphics stack.
-
-## Platforms
 
 [![Build](https://github.com/nabakrishna/mosaic-widget/actions/workflows/build.yml/badge.svg)](https://github.com/nabakrishna/mosaic-widget/actions/workflows/build.yml)
 [![Latest release](https://img.shields.io/github/v/release/nabakrishna/mosaic-widget?color=2ea44f)](https://github.com/nabakrishna/mosaic-widget/releases/latest)
@@ -17,6 +9,12 @@ Mosaic does not use Electron, a browser runtime, or a cross-platform UI toolkit.
 [![CMake](https://img.shields.io/badge/build-CMake-064F8C?logo=cmake&logoColor=white)](https://github.com/nabakrishna/mosaic-widget/blob/main/CMakeLists.txt)
 [![Direct2D](https://img.shields.io/badge/graphics-Direct2D-0078D4?logo=windows&logoColor=white)](https://learn.microsoft.com/windows/win32/direct2d/direct2d-portal)
 [![DirectComposition](https://img.shields.io/badge/composition-DirectComposition-0078D4?logo=windows&logoColor=white)](https://learn.microsoft.com/windows/win32/directcomp/directcomposition-portal)
+
+A native Win32 + Direct2D + DirectComposition dashboard shell. No Electron,
+no browser runtime, no third-party UI framework — just the Windows graphics
+stack, driven directly.
+</br>
+Mosaic does not use Electron, a browser runtime, or a cross-platform UI toolkit. Its rendering and window management are built directly on the Windows graphics stack.
 
 ## Features
 
