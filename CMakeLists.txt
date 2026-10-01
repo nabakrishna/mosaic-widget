@@ -330,7 +330,8 @@ set_target_properties(Mosaic PROPERTIES
 # Off by default so a normal `cmake --build` for the app itself never pays
 # for a GoogleTest download it doesn't need. Enable explicitly with
 # -DMOSAIC_BUILD_TESTS=ON (CI does this — see .github/workflows/build.yml).
-option(MOSAIC_BUILD_TESTS "Build Mosaic's unit test suite (fetches GoogleTest)" OFF)
+#DMOSAIC_BUILD_TESTS=ON for test 
+option(MOSAIC_BUILD_TESTS "Build Mosaic's unit test suite (fetches GoogleTest)" ON)
 if(MOSAIC_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
