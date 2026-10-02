@@ -1,0 +1,1144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mosaic — Desktop, in motion.</title>
+  <meta name="description" content="Mosaic is a native Windows desktop widget dashboard built with C++20 for tasks, pinned items, reminders, photos and private notes.">
+  <link rel="icon" href="../resources/icons/app.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f8f7f4;
+      --bg-2: #f1f1ec;
+      --paper: #fffefa;
+      --ink: #171917;
+      --muted: #6f726d;
+      --line: rgba(23,25,23,.12);
+      --line-strong: rgba(23,25,23,.18);
+      --blue: #6878ff;
+      --blue-deep: #4052df;
+      --lavender: #c9ccff;
+      --mint: #cbe8d9;
+      --peach: #f1c7b8;
+      --yellow: #f0df9a;
+      --sky: #c4e3ef;
+      --white: #fff;
+      --shadow: 0 36px 100px rgba(20,24,20,.14);
+      --shadow-soft: 0 18px 45px rgba(20,24,20,.09);
+      --sans: Manrope, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 75% 4%, rgba(104,120,255,.09), transparent 24%),
+        radial-gradient(circle at 10% 30%, rgba(203,232,217,.13), transparent 20%),
+        linear-gradient(180deg, var(--bg) 0%, #faf9f6 45%, #f1f0eb 100%);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 80;
+      opacity: .17;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+    ::selection { background: var(--blue); color: #fff; }
+    a { color: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    .shell { width: min(1240px, calc(100% - 48px)); margin: 0 auto; }
+    .mono { font-family: var(--mono); }
+
+    /* ---------- Top navigation ---------- */
+    .site-header {
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 90;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      letter-spacing: -.05em;
+      font-size: 18px;
+    }
+    .brand-mark {
+      position: relative;
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      background: var(--ink);
+      transform: rotate(-8deg);
+      box-shadow: inset 2px 2px 0 rgba(255,255,255,.2), 0 10px 20px rgba(23,25,23,.12);
+    }
+    .brand-mark::before,
+    .brand-mark::after {
+      content:"";
+      position:absolute;
+      width:5px; height:5px;
+      border-radius:50%;
+      background:var(--bg);
+    }
+    .brand-mark::before { left:5px; top:5px; }
+    .brand-mark::after { right:5px; bottom:5px; }
+    .nav {
+      display:flex;
+      align-items:center;
+      gap:30px;
+      font-size:13px;
+      font-weight:700;
+    }
+    .nav a { text-decoration:none; color:#4f514d; transition:opacity .25s ease, transform .25s ease; }
+    .nav a:hover { opacity:.55; transform:translateY(-1px); }
+    .nav .cta {
+      padding:11px 16px;
+      border-radius:999px;
+      background:var(--ink);
+      color:#fff;
+      transition:transform .35s cubic-bezier(.2,.8,.2,1), background .35s ease;
+    }
+    .nav .cta:hover { opacity:1; transform:translateY(-2px) scale(1.02); background:var(--blue); }
+
+    /* ---------- Global ambient animation ---------- */
+    .ambient {
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      z-index: 2;
+      overflow:hidden;
+    }
+    #particleCanvas { position:absolute; inset:0; width:100%; height:100%; }
+    .cursor-aura {
+      position:absolute;
+      width:260px;
+      height:260px;
+      margin:-130px 0 0 -130px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(104,120,255,.08), rgba(104,120,255,0) 66%);
+      filter:blur(1px);
+      transform:translate3d(-50vw,-50vh,0);
+      opacity:.7;
+      will-change:transform;
+    }
+    .ambient-thread {
+      position:absolute;
+      width:1px;
+      height:180vh;
+      top:-30vh;
+      background:linear-gradient(to bottom, transparent, rgba(104,120,255,.14), transparent);
+      filter:blur(.25px);
+      opacity:.75;
+      transform-origin:50% 50%;
+    }
+    .thread-a { left:12%; transform:rotate(16deg); animation:threadA 18s ease-in-out infinite; }
+    .thread-b { right:13%; transform:rotate(-13deg); animation:threadB 21s ease-in-out infinite; }
+    @keyframes threadA { 0%,100% { translate:0 0; } 50% { translate:22px 0; } }
+    @keyframes threadB { 0%,100% { translate:0 0; } 50% { translate:-18px 0; } }
+
+    /* ---------- Scroll progress ---------- */
+    .scroll-meter {
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:2px;
+      background:rgba(23,25,23,.045);
+      z-index:120;
+    }
+    .scroll-meter span { display:block; width:0; height:100%; background:var(--blue); transform-origin:left center; }
+
+    /* ---------- Hero: pinned, cinematic stage ---------- */
+    .hero-wrap { position:relative; }
+    .hero {
+      min-height:190vh;
+      position:relative;
+      padding:30px 0 0;
+    }
+    .hero-sticky {
+      position:sticky;
+      top:0;
+      height:calc(100vh - 4px);
+      min-height:720px;
+      display:grid;
+      align-items:center;
+      overflow:visible;
+    }
+    .hero-copy {
+      position:absolute;
+      left:0;
+      top:11%;
+      width:min(610px, 58vw);
+      z-index:20;
+    }
+    .eyebrow {
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      margin:0 0 22px;
+      color:#696d68;
+      font:500 10px/1.35 var(--mono);
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .eyebrow::before { content:""; width:28px; height:1px; background:var(--blue); }
+    .hero h1 {
+      margin:0;
+      max-width:760px;
+      font-size:clamp(70px, 8.6vw, 142px);
+      line-height:.81;
+      letter-spacing:-.09em;
+      font-weight:800;
+    }
+    .hero h1 .line { display:block; overflow:hidden; }
+    .hero h1 .word { display:inline-block; transform:translateY(115%); }
+    .hero-desc {
+      max-width:545px;
+      margin:30px 0 0;
+      font-size:17px;
+      line-height:1.7;
+      color:var(--muted);
+    }
+    .hero-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:27px; }
+    .button {
+      min-height:48px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:9px;
+      padding:0 18px;
+      border-radius:999px;
+      border:1px solid var(--ink);
+      font-size:13px;
+      font-weight:800;
+      text-decoration:none;
+      transition:transform .45s cubic-bezier(.2,.8,.2,1), background .35s ease, color .35s ease, box-shadow .35s ease;
+      position:relative;
+      overflow:hidden;
+    }
+    .button::after {
+      content:"";
+      position:absolute;
+      left:-20%; top:-120%; width:45%; height:320%;
+      background:linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent);
+      transform:rotate(18deg);
+      transition:transform .7s ease;
+    }
+    .button:hover { transform:translateY(-4px); }
+    .button:hover::after { transform:translateX(300%) rotate(18deg); }
+    .button-primary { background:var(--ink); color:#fff; box-shadow:0 13px 30px rgba(23,25,23,.12); }
+    .button-primary:hover { background:var(--blue); border-color:var(--blue); box-shadow:0 16px 36px rgba(104,120,255,.22); }
+    .button-secondary { background:rgba(255,255,255,.42); }
+    .button-secondary:hover { background:rgba(255,255,255,.88); }
+    .hero-meta { display:flex; flex-wrap:wrap; gap:16px; margin-top:20px; color:#8a8c87; font:400 9px/1.5 var(--mono); text-transform:uppercase; letter-spacing:.04em; }
+    .hero-meta span { display:inline-flex; align-items:center; gap:7px; }
+    .hero-meta i { width:5px; height:5px; border-radius:50%; background:var(--blue); }
+
+    /* ---------- Hero 3D object ---------- */
+    .hero-stage {
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      perspective:1800px;
+      pointer-events:none;
+      z-index:12;
+    }
+    .hero-floor {
+      position:absolute;
+      width:740px;
+      height:430px;
+      border-radius:50%;
+      background:radial-gradient(ellipse, rgba(23,25,23,.14), rgba(23,25,23,0) 70%);
+      filter:blur(22px);
+      transform:translate3d(170px,235px,-140px) rotateX(65deg) rotateZ(-10deg);
+      opacity:.45;
+    }
+    .scene {
+      width:min(730px, 58vw);
+      aspect-ratio:1.18 / 1;
+      position:relative;
+      transform-style:preserve-3d;
+      transform:translate3d(150px, 28px, 0) rotateX(8deg) rotateY(-13deg) rotateZ(-2deg) scale(.88);
+      will-change:transform;
+      z-index:10;
+    }
+    .scene-halo {
+      position:absolute;
+      left:10%; top:5%; width:80%; height:80%;
+      border-radius:50%;
+      background:
+        radial-gradient(circle, rgba(104,120,255,.11), rgba(104,120,255,0) 62%),
+        conic-gradient(from 15deg, rgba(201,204,255,.65), rgba(203,232,217,0), rgba(241,199,184,.55), rgba(196,227,239,0), rgba(201,204,255,.65));
+      filter:blur(1px);
+      animation:haloPulse 8s ease-in-out infinite;
+      transform:translateZ(-50px);
+    }
+    @keyframes haloPulse { 0%,100% { scale:.94; rotate:0deg; opacity:.72; } 50% { scale:1.02; rotate:9deg; opacity:1; } }
+
+    .orbit-ring {
+      position:absolute;
+      left:4%; top:13%;
+      width:92%; height:68%;
+      border:1px solid rgba(23,25,23,.11);
+      border-radius:50%;
+      transform:rotateX(69deg) rotateZ(-13deg) translateZ(-3px);
+      animation:orbitFloat 18s linear infinite;
+    }
+    .orbit-ring::before,
+    .orbit-ring::after { content:""; position:absolute; border:1px solid rgba(104,120,255,.17); border-radius:50%; }
+    .orbit-ring::before { inset:8%; }
+    .orbit-ring::after { inset:22%; border-color:rgba(23,25,23,.07); }
+    .orbit-dot {
+      position:absolute; width:14px; height:14px; border-radius:50%;
+      top:-7px; left:24%;
+      background:var(--blue);
+      box-shadow:0 0 0 6px rgba(104,120,255,.10), 0 0 32px rgba(104,120,255,.4);
+    }
+    @keyframes orbitFloat { from { rotate:0deg; } to { rotate:360deg; } }
+
+    .device {
+      position:absolute;
+      left:11%; top:13%; width:79%; height:70%;
+      transform-style:preserve-3d;
+      transform:translateZ(30px) rotateZ(-5deg);
+    }
+    .device-back {
+      position:absolute; inset:0;
+      border-radius:42px;
+      background:linear-gradient(145deg, #ffffff, #ebece7);
+      border:1px solid rgba(23,25,23,.16);
+      box-shadow:0 38px 95px rgba(23,25,23,.16), inset 0 1px 0 rgba(255,255,255,.95);
+    }
+    .device-depth {
+      position:absolute; inset:0;
+      border-radius:42px;
+      background:#d1d2cc;
+      transform:translateZ(-30px) translateY(19px);
+      box-shadow:0 26px 44px rgba(23,25,23,.12);
+    }
+    .device-depth::after {
+      content:""; position:absolute; left:4%; right:4%; bottom:-10px; height:17px; border-radius:50%; background:rgba(23,25,23,.11); filter:blur(11px);
+    }
+    .device-topbar {
+      position:absolute; left:6%; right:6%; top:6%; height:46px;
+      display:flex; align-items:center; justify-content:space-between;
+      border-bottom:1px solid rgba(23,25,23,.085);
+      font:500 9px/1 var(--mono); color:#777a75;
+      text-transform:uppercase; letter-spacing:.04em;
+    }
+    .device-topbar .left { display:flex; align-items:center; gap:8px; }
+    .device-dot { width:6px; height:6px; border-radius:50%; background:#79a486; box-shadow:0 0 0 4px rgba(121,164,134,.11); }
+    .device-content {
+      position:absolute; left:6%; right:6%; top:15%; bottom:6%;
+      display:grid; grid-template-columns:1.04fr .96fr; grid-template-rows:1.06fr .94fr; gap:11px;
+      transform-style:preserve-3d;
+    }
+    .panel {
+      position:relative;
+      border:1px solid rgba(23,25,23,.09);
+      border-radius:23px;
+      overflow:hidden;
+      background:rgba(255,255,255,.88);
+      box-shadow:0 17px 33px rgba(23,25,23,.07), inset 0 1px 0 rgba(255,255,255,.9);
+      transform-style:preserve-3d;
+    }
+    .panel.todo { grid-row:span 2; padding:17px; background:linear-gradient(145deg,#ffffff,#f1f2ed); }
+    .panel.photo { padding:9px; }
+    .panel.note { padding:16px; background:linear-gradient(145deg,#f0efff,#fffefa); }
+    .panel-title { font-size:12px; font-weight:800; letter-spacing:-.03em; }
+    .panel-sub { margin-top:3px; color:#858982; font:400 8px/1.4 var(--mono); }
+    .progress { margin:16px 0 14px; height:6px; background:#e9e9e4; border-radius:999px; overflow:hidden; }
+    .progress span { display:block; width:68%; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--blue),#94a0ff); animation:progressMove 5s ease-in-out infinite; }
+    @keyframes progressMove { 0%,100% { width:62%; } 50% { width:76%; } }
+    .task { display:flex; align-items:center; gap:8px; padding:8px 0; border-top:1px solid rgba(23,25,23,.07); font-size:8px; color:#585b56; }
+    .task:first-of-type { border-top:0; }
+    .check { width:11px; height:11px; border-radius:4px; border:1px solid #c6c9c3; background:#fff; }
+    .task.done { color:#93958f; text-decoration:line-through; }
+    .task.done .check { background:var(--blue); border-color:var(--blue); box-shadow:inset 0 0 0 3px #fff; }
+    .photo-visual {
+      position:relative; width:100%; height:100%; min-height:120px; border-radius:17px; overflow:hidden;
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255,255,255,.62) 0 7%, transparent 8%),
+        linear-gradient(145deg, #dce4ff 0%, #b5c3ff 42%, #9fb4d2 70%, #e8d6cc 100%);
+    }
+    .photo-visual::before { content:""; position:absolute; width:86px; height:86px; border-radius:50%; background:rgba(255,255,255,.46); left:14%; top:13%; filter:blur(2px); }
+    .photo-visual::after { content:""; position:absolute; left:-10%; bottom:-22%; width:130%; height:58%; background:rgba(48,65,98,.14); border-radius:50% 50% 0 0; transform:rotate(-5deg); }
+    .note-lines { margin-top:13px; display:grid; gap:7px; }
+    .note-lines span { height:5px; border-radius:999px; background:rgba(65,79,124,.13); }
+    .note-lines span:nth-child(2) { width:82%; }
+    .note-lines span:nth-child(3) { width:64%; }
+    .mini-orb {
+      position:absolute; width:120px; height:120px; border-radius:50%; right:-11px; bottom:-26px;
+      background:radial-gradient(circle at 36% 30%, #fff 0 4%, #9ca7ff 19%, #6475f7 44%, #3647d4 70%);
+      filter:blur(.2px); opacity:.85; transform:translateZ(25px);
+      animation:miniOrb 7s ease-in-out infinite;
+    }
+    @keyframes miniOrb { 0%,100% { transform:translate3d(0,0,25px) scale(1); } 50% { transform:translate3d(-8px,-8px,25px) scale(1.06); } }
+
+    /* floating product fragments around main object */
+    .float-card {
+      position:absolute;
+      padding:12px 14px;
+      border-radius:18px;
+      background:rgba(255,255,255,.73);
+      border:1px solid rgba(23,25,23,.11);
+      box-shadow:var(--shadow-soft);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      font-size:10px;
+      z-index:18;
+      transform-style:preserve-3d;
+      pointer-events:none;
+    }
+    .float-card strong { display:block; font-size:14px; letter-spacing:-.04em; }
+    .float-card small { color:#777a74; font:400 8px/1.4 var(--mono); text-transform:uppercase; }
+    .float-card.task-chip { left:3%; top:32%; transform:rotateZ(-8deg) translateZ(80px); animation:floatOne 7.5s ease-in-out infinite; }
+    .float-card.time-chip { right:2%; top:16%; transform:rotateZ(6deg) translateZ(100px); animation:floatTwo 8.2s ease-in-out infinite; }
+    .float-card.note-chip { right:3%; bottom:18%; transform:rotateZ(-5deg) translateZ(95px); animation:floatThree 9s ease-in-out infinite; }
+    @keyframes floatOne { 0%,100% { translate:0 0; } 50% { translate:-6px -20px; } }
+    @keyframes floatTwo { 0%,100% { translate:0 0; } 50% { translate:8px 16px; } }
+    @keyframes floatThree { 0%,100% { translate:0 0; } 50% { translate:-7px 14px; } }
+
+    .scroll-cue {
+      position:absolute;
+      left:0; bottom:9%;
+      display:flex; align-items:center; gap:12px;
+      color:#898b85;
+      font:500 9px/1 var(--mono);
+      letter-spacing:.1em; text-transform:uppercase;
+    }
+    .scroll-cue span { width:43px; height:1px; background:var(--line-strong); position:relative; overflow:hidden; }
+    .scroll-cue span::after { content:""; position:absolute; left:-100%; width:100%; height:100%; background:var(--blue); animation:cue 2s linear infinite; }
+    @keyframes cue { to { left:100%; } }
+
+    /* ---------- Section framework ---------- */
+    .section {
+      position:relative;
+      padding:150px 0;
+      border-top:1px solid var(--line);
+    }
+    .section-head {
+      display:grid;
+      grid-template-columns:.86fr 1.14fr;
+      gap:54px;
+      align-items:end;
+      margin-bottom:52px;
+    }
+    .section h2 {
+      margin:0;
+      font-size:clamp(42px, 5.4vw, 78px);
+      line-height:.91;
+      letter-spacing:-.075em;
+      font-weight:800;
+      max-width:770px;
+    }
+    .intro { margin:0; max-width:585px; font-size:16px; line-height:1.72; color:var(--muted); }
+
+    /* ---------- Marquee ---------- */
+    .marquee {
+      width:100vw;
+      margin-left:50%; transform:translateX(-50%);
+      overflow:hidden;
+      border-top:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.25);
+    }
+    .marquee-track {
+      display:flex; width:max-content;
+      animation:marquee 24s linear infinite;
+    }
+    .marquee-item {
+      display:flex; align-items:center; gap:22px;
+      padding:22px 25px;
+      font-weight:800; font-size:15px;
+      letter-spacing:-.03em;
+      white-space:nowrap;
+    }
+    .marquee-item i { width:8px; height:8px; border-radius:50%; background:var(--blue); display:block; }
+    @keyframes marquee { to { transform:translateX(-50%); } }
+
+    /* ---------- Features: animated mosaic grid ---------- */
+    .feature-grid {
+      display:grid;
+      grid-template-columns:repeat(12, minmax(0,1fr));
+      gap:12px;
+    }
+    .feature {
+      min-height:350px;
+      padding:23px 23px 0;
+      border:1px solid var(--line);
+      border-radius:28px;
+      background:rgba(255,255,255,.38);
+      overflow:hidden;
+      position:relative;
+      transform-style:preserve-3d;
+      will-change:transform;
+    }
+    .feature:nth-child(1), .feature:nth-child(4) { grid-column:span 7; }
+    .feature:nth-child(2), .feature:nth-child(3), .feature:nth-child(5), .feature:nth-child(6) { grid-column:span 5; }
+    .feature:nth-child(2) { background:linear-gradient(145deg,rgba(201,204,255,.38),rgba(255,255,255,.34)); }
+    .feature:nth-child(3) { background:linear-gradient(145deg,rgba(203,232,217,.42),rgba(255,255,255,.34)); }
+    .feature:nth-child(4) { background:linear-gradient(145deg,rgba(196,227,239,.46),rgba(255,255,255,.34)); }
+    .feature:nth-child(5) { background:linear-gradient(145deg,rgba(241,199,184,.4),rgba(255,255,255,.35)); }
+    .feature:nth-child(6) { background:linear-gradient(145deg,rgba(240,223,154,.36),rgba(255,255,255,.35)); }
+    .feature-number { display:block; margin-bottom:20px; color:#81847d; font:500 9px/1 var(--mono); text-transform:uppercase; letter-spacing:.08em; }
+    .feature h3 { margin:0; font-size:24px; letter-spacing:-.05em; }
+    .feature p { max-width:390px; margin:10px 0 0; color:#6f726c; font-size:13px; line-height:1.65; }
+    .feature::after {
+      content:"";
+      position:absolute; width:200px; height:200px;
+      right:-55px; bottom:-70px;
+      border-radius:50%;
+      border:1px solid rgba(23,25,23,.1);
+      transform:translateZ(30px);
+      box-shadow:0 0 0 18px rgba(255,255,255,.15), 0 0 0 36px rgba(255,255,255,.1);
+    }
+    .feature-visual { position:absolute; left:22px; right:22px; bottom:-42px; height:145px; transform-style:preserve-3d; }
+    .tile {
+      position:absolute; width:110px; height:74px; border-radius:18px;
+      border:1px solid rgba(23,25,23,.12); box-shadow:0 18px 30px rgba(23,25,23,.09);
+      transform-style:preserve-3d;
+      background:var(--paper);
+    }
+    .tile::after { content:""; position:absolute; inset:9px; border:1px solid rgba(23,25,23,.08); border-radius:11px; }
+    .tile.a { left:2%; bottom:5px; background:linear-gradient(145deg,#fff,#dfe3ff); transform:rotateZ(-8deg) rotateY(12deg) translateZ(20px); }
+    .tile.b { left:26%; bottom:22px; background:linear-gradient(145deg,#f4fff9,#cbe8d9); transform:rotateZ(4deg) rotateY(-12deg) translateZ(35px); }
+    .tile.c { left:53%; bottom:-3px; background:linear-gradient(145deg,#fff6f1,#f1c7b8); transform:rotateZ(10deg) rotateY(10deg) translateZ(15px); }
+    .feature:hover .tile.a { animation:tileA 1.2s cubic-bezier(.2,.8,.2,1) forwards; }
+    .feature:hover .tile.b { animation:tileB 1.2s cubic-bezier(.2,.8,.2,1) forwards; }
+    .feature:hover .tile.c { animation:tileC 1.2s cubic-bezier(.2,.8,.2,1) forwards; }
+    @keyframes tileA { to { translate:-6px -34px; rotate:-13deg; } }
+    @keyframes tileB { to { translate:4px -43px; rotate:8deg; } }
+    @keyframes tileC { to { translate:9px -20px; rotate:15deg; } }
+
+    /* ---------- Interlude: giant type + moving line ---------- */
+    .interlude {
+      min-height:95vh;
+      display:grid;
+      align-items:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .interlude-word {
+      font-size:clamp(90px, 17vw, 250px);
+      font-weight:800;
+      letter-spacing:-.1em;
+      line-height:.82;
+      white-space:nowrap;
+      transform:translateX(-8vw);
+      opacity:.93;
+    }
+    .interlude-sub { max-width:430px; margin-top:24px; color:var(--muted); font-size:15px; line-height:1.7; }
+    .sweep-line {
+      position:absolute; width:160vw; height:1px;
+      left:-30vw; top:52%;
+      background:linear-gradient(90deg, transparent, rgba(104,120,255,.7), transparent);
+      transform:rotate(-7deg);
+      filter:drop-shadow(0 0 8px rgba(104,120,255,.3));
+    }
+    .sweep-orb {
+      position:absolute; width:22px; height:22px; border-radius:50%; background:var(--blue);
+      box-shadow:0 0 0 7px rgba(104,120,255,.1), 0 0 28px rgba(104,120,255,.3);
+      top:calc(52% - 11px); left:-30px;
+    }
+
+    /* ---------- Product showcase ---------- */
+    .showcase {
+      min-height:115vh;
+      display:grid;
+      align-items:center;
+    }
+    .showcase-stage {
+      min-height:720px;
+      position:relative;
+      perspective:1800px;
+      display:grid;
+      place-items:center;
+      overflow:visible;
+    }
+    .showcase-frame {
+      width:min(1000px, 90vw);
+      aspect-ratio:1.63/1;
+      position:relative;
+      transform-style:preserve-3d;
+      transform:rotateX(13deg) rotateY(-8deg) rotateZ(-3deg) translateZ(0);
+      box-shadow:var(--shadow);
+      will-change:transform;
+    }
+    .showcase-frame::before {
+      content:""; position:absolute; inset:-38px -54px -64px;
+      border:1px solid rgba(23,25,23,.08);
+      border-radius:42px;
+      transform:translateZ(-55px);
+      background:linear-gradient(145deg,rgba(255,255,255,.48),rgba(220,222,217,.16));
+    }
+    .showcase-back {
+      position:absolute; inset:0; border-radius:31px;
+      background:#d7d8d3; transform:translateZ(-44px) translateY(24px);
+    }
+    .showcase-front {
+      position:absolute; inset:0; overflow:hidden;
+      border:1px solid rgba(23,25,23,.15);
+      border-radius:31px;
+      background:#0d1110;
+      box-shadow:0 45px 120px rgba(23,25,23,.17), inset 0 1px 0 rgba(255,255,255,.3);
+    }
+    .showcase-front img { display:block; width:100%; height:100%; object-fit:cover; }
+    .showcase-glint {
+      position:absolute; left:-30%; top:-20%; width:28%; height:150%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);
+      transform:rotate(18deg);
+      animation:glint 7s ease-in-out infinite;
+    }
+    @keyframes glint { 0%,55% { translate:0 0; opacity:0; } 65% { opacity:1; } 100% { translate:360% 0; opacity:0; } }
+    .showcase-copy {
+      position:absolute;
+      left:3%; bottom:1%; z-index:5;
+      width:min(380px,40vw);
+      padding:17px 19px;
+      border:1px solid var(--line);
+      border-radius:21px;
+      background:rgba(255,255,255,.72);
+      backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+      box-shadow:var(--shadow-soft);
+      transform:translateZ(74px) rotateZ(2deg);
+    }
+    .showcase-copy strong { display:block; font-size:13px; }
+    .showcase-copy p { margin:5px 0 0; color:#7c7f78; font:400 9px/1.55 var(--mono); }
+    .showcase-bits { position:absolute; inset:0; pointer-events:none; z-index:12; }
+    .bit { position:absolute; width:12px; height:12px; border-radius:50%; border:1px solid rgba(23,25,23,.13); background:#fff; box-shadow:0 8px 16px rgba(23,25,23,.08); }
+    .bit.b1 { left:7%; top:15%; background:var(--mint); }
+    .bit.b2 { right:7%; top:24%; background:var(--peach); }
+    .bit.b3 { right:14%; bottom:11%; background:var(--lavender); }
+    .bit.b4 { left:16%; bottom:16%; background:var(--yellow); }
+
+    /* ---------- Technical section ---------- */
+    .tech {
+      display:grid;
+      grid-template-columns:.82fr 1.18fr;
+      gap:70px;
+      align-items:start;
+    }
+    .tech-stack { display:flex; flex-wrap:wrap; gap:7px; margin-top:24px; }
+    .tech-stack span { padding:9px 11px; border:1px solid var(--line); border-radius:999px; font:500 9px/1 var(--mono); color:#646762; background:rgba(255,255,255,.34); }
+    .spec-list { border-top:1px solid var(--line); }
+    .spec-row { display:grid; grid-template-columns:140px 1fr; gap:30px; padding:20px 0; border-bottom:1px solid var(--line); }
+    .spec-row .label { color:#848780; font:500 9px/1.4 var(--mono); text-transform:uppercase; letter-spacing:.05em; }
+    .spec-row .value { font-size:14px; line-height:1.65; color:#444742; }
+
+    /* ---------- Closing ---------- */
+    .closing { padding:70px 0 100px; }
+    .privacy {
+      display:grid; grid-template-columns:1fr auto; gap:40px; align-items:center;
+      padding:46px;
+      border-radius:34px;
+      background:linear-gradient(135deg,#232825,#161917);
+      color:#fff;
+      position:relative;
+      overflow:hidden;
+    }
+    .privacy::before {
+      content:""; position:absolute; width:430px; height:430px; right:-110px; top:-150px; border-radius:50%;
+      border:1px solid rgba(255,255,255,.08); box-shadow:0 0 0 34px rgba(255,255,255,.025), 0 0 0 68px rgba(255,255,255,.018);
+      animation:privacyOrbit 16s linear infinite;
+    }
+    @keyframes privacyOrbit { to { rotate:360deg; } }
+    .privacy .eyebrow { color:#b6bab3; position:relative; z-index:2; }
+    .privacy .eyebrow::before { background:var(--blue); }
+    .privacy h2 { position:relative; z-index:2; max-width:760px; margin:0; font-size:clamp(46px,6vw,84px); line-height:.88; letter-spacing:-.08em; }
+    .privacy p { max-width:650px; margin:20px 0 0; color:#c4c8c1; line-height:1.7; font-size:14px; position:relative; z-index:2; }
+    .privacy .button { background:var(--paper); color:var(--ink); border-color:var(--paper); position:relative; z-index:4; white-space:nowrap; }
+    .privacy .button:hover { background:var(--blue); color:#fff; border-color:var(--blue); }
+
+    footer { padding:28px 0 46px; border-top:1px solid var(--line); }
+    .footer-inner { display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; color:#747770; font-size:11px; }
+    .footer-inner p { margin:0; }
+    .footer-links { display:flex; gap:20px; }
+    .footer-links a { color:var(--ink); font-weight:800; text-decoration:none; }
+
+    /* ---------- Accessibility / reveal ---------- */
+    .reveal { opacity:0; transform:translateY(30px); }
+    .reveal.is-in { opacity:1; transform:none; transition:opacity .9s ease, transform .9s cubic-bezier(.2,.8,.2,1); }
+
+    @media (max-width: 980px) {
+      .hero-copy { width:min(560px, 90vw); top:8%; }
+      .scene { width:min(740px, 90vw); transform:translate3d(7vw, 110px,0) rotateX(8deg) rotateY(-11deg) rotateZ(-2deg) scale(.82); }
+      .hero-stage { align-items:end; padding-bottom:12%; }
+      .hero { min-height:165vh; }
+      .section-head, .tech { grid-template-columns:1fr; gap:22px; }
+      .feature:nth-child(n) { grid-column:span 6; }
+      .showcase-stage { min-height:640px; }
+      .privacy { grid-template-columns:1fr; }
+    }
+
+    @media (max-width: 680px) {
+      .shell { width:min(100% - 28px, 640px); }
+      .site-header { height:68px; }
+      .nav { gap:13px; }
+      .nav a:not(.cta) { display:none; }
+      .hero { min-height:145vh; }
+      .hero-sticky { min-height:680px; }
+      .hero-copy { width:100%; top:5%; }
+      .hero h1 { font-size:clamp(58px, 16vw, 88px); }
+      .hero-desc { font-size:15px; margin-top:20px; }
+      .hero-actions .button { flex:1 1 100%; }
+      .scene { width:102vw; transform:translate3d(4vw, 120px,0) rotateX(7deg) rotateY(-8deg) rotateZ(-2deg) scale(.72); }
+      .float-card { display:none; }
+      .hero-floor { transform:translate3d(35px, 230px,-140px) rotateX(65deg) rotateZ(-10deg) scale(.8); }
+      .section { padding:92px 0; }
+      .section-head { margin-bottom:34px; }
+      .feature:nth-child(n) { grid-column:span 12; min-height:320px; }
+      .interlude { min-height:74vh; }
+      .interlude-word { font-size:28vw; }
+      .showcase { min-height:92vh; }
+      .showcase-stage { min-height:500px; }
+      .showcase-frame { width:102vw; }
+      .showcase-copy { left:2%; width:73%; }
+      .spec-row { grid-template-columns:1fr; gap:7px; }
+      .privacy { padding:30px 24px; }
+      .footer-inner { flex-direction:column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior:auto !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+      .hero { min-height:auto; }
+      .hero-sticky { position:relative; height:auto; min-height:700px; }
+      .reveal { opacity:1 !important; transform:none !important; }
+      .journey-node { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="scroll-meter"><span></span></div>
+  <div class="ambient" aria-hidden="true">
+    <canvas id="particleCanvas"></canvas>
+    <div class="cursor-aura"></div>
+    <div class="ambient-thread thread-a"></div>
+    <div class="ambient-thread thread-b"></div>
+  </div>
+
+  <header class="site-header shell">
+    <a class="brand" href="#top" aria-label="Mosaic home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      Mosaic
+    </a>
+    <nav class="nav" aria-label="Main navigation">
+      <a href="#features">Features</a>
+      <a href="#native">System</a>
+      <a href="https://github.com/nabakrishna/mosaic-widget">Source</a>
+      <a class="cta" href="https://github.com/nabakrishna/mosaic-widget/releases/latest">Get Mosaic</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero-wrap" aria-labelledby="hero-title">
+      <div class="hero">
+        <div class="hero-sticky shell">
+          <div class="hero-copy">
+            <p class="eyebrow">Native Windows desktop widgets / C++20</p>
+            <h1 id="hero-title" aria-label="Your desktop, in good order.">
+              <span class="line"><span class="word">Your</span> <span class="word">desktop,</span></span>
+              <span class="line"><span class="word">in</span> <span class="word">good</span> <span class="word">order.</span></span>
+            </h1>
+            <p class="hero-desc">Mosaic keeps the small things you reach for every day on the Windows desktop: tasks, pinned items, special activity reminders, rotating photos, and Quick Notes.</p>
+            <div class="hero-actions">
+              <a class="button button-primary magnetic" href="https://github.com/nabakrishna/mosaic-widget/releases/latest">Download latest ↗</a>
+              <a class="button button-secondary magnetic" href="https://github.com/nabakrishna/mosaic-widget">Explore source</a>
+            </div>
+            <div class="hero-meta mono">
+              <span><i></i>Local-first</span>
+              <span><i></i>Native rendering</span>
+              <span><i></i>No browser runtime</span>
+            </div>
+          </div>
+
+          <div class="hero-stage" data-hero-stage>
+            <div class="hero-floor"></div>
+            <div class="scene" data-scene>
+              <div class="scene-halo"></div>
+              <div class="orbit-ring"><div class="orbit-dot"></div></div>
+              <div class="float-card task-chip"><strong>04 / 06</strong><small>tasks complete</small></div>
+              <div class="float-card time-chip"><strong>09:42</strong><small>focus window</small></div>
+              <div class="float-card note-chip"><strong>2 notes</strong><small>saved locally</small></div>
+
+              <div class="device-depth"></div>
+              <div class="device">
+                <div class="device-back"></div>
+                <div class="device-topbar">
+                  <div class="left"><span class="device-dot"></span><span>mosaic / today</span></div>
+                  <span>native workspace</span>
+                </div>
+                <div class="device-content">
+                  <div class="panel todo">
+                    <div class="panel-title">Today</div>
+                    <div class="panel-sub">A small list. Less noise.</div>
+                    <div class="progress"><span></span></div>
+                    <div class="task done"><span class="check"></span><span>Finish UI system</span></div>
+                    <div class="task done"><span class="check"></span><span>Review pull request</span></div>
+                    <div class="task"><span class="check"></span><span>Walk for 20 minutes</span></div>
+                    <div class="task"><span class="check"></span><span>Plan tomorrow</span></div>
+                  </div>
+                  <div class="panel photo">
+                    <div class="photo-visual"></div>
+                  </div>
+                  <div class="panel note">
+                    <div class="panel-title">Quick Note</div>
+                    <div class="panel-sub">private / local</div>
+                    <div class="note-lines"><span></span><span></span><span></span></div>
+                    <div class="mini-orb"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scroll-cue"><span></span>scroll to move the system</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="marquee" aria-label="Mosaic principles">
+      <div class="marquee-track">
+        <div class="marquee-item"><i></i>Useful by default</div>
+        <div class="marquee-item"><i></i>Quiet on the desktop</div>
+        <div class="marquee-item"><i></i>Native Windows</div>
+        <div class="marquee-item"><i></i>Local data</div>
+        <div class="marquee-item"><i></i>Useful by default</div>
+        <div class="marquee-item"><i></i>Quiet on the desktop</div>
+        <div class="marquee-item"><i></i>Native Windows</div>
+        <div class="marquee-item"><i></i>Local data</div>
+      </div>
+    </section>
+
+    <section class="section shell" id="features">
+      <div class="section-head reveal">
+        <div>
+          <p class="eyebrow">01 / Everyday layer</p>
+          <h2>Six small tools. One calm surface.</h2>
+        </div>
+        <p class="intro">The interface is designed around things that deserve to be visible without asking for your attention. Each widget stays simple; together they form a flexible desktop composition.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature reveal" data-tilt>
+          <span class="feature-number">01 / Tasks</span>
+          <h3>To-do list</h3>
+          <p>Add, edit, complete, and remove tasks. The list stays visible while the rest of the desktop remains uncluttered.</p>
+          <div class="feature-visual"><span class="tile a"></span><span class="tile b"></span><span class="tile c"></span></div>
+        </article>
+        <article class="feature reveal" data-tilt>
+          <span class="feature-number">02 / Pinboard</span>
+          <h3>Pinned items</h3>
+          <p>Keep important links, words, or items visible with local persistence and a dedicated place.</p>
+          <div class="feature-visual"><span class="tile b"></span><span class="tile c"></span></div>
+        </article>
+        <article class="feature reveal" data-tilt>
+          <span class="feature-number">03 / Schedule</span>
+          <h3>Special activity</h3>
+          <p>Set an activity for a date and let Mosaic surface a reminder when the moment arrives.</p>
+          <div class="feature-visual"><span class="tile c"></span><span class="tile a"></span></div>
+        </article>
+        <article class="feature reveal" data-tilt>
+          <span class="feature-number">04 / Photos</span>
+          <h3>Rotating photo widget</h3>
+          <p>Show local images with subtle transitions so the picture changes while the desktop stays quiet.</p>
+          <div class="feature-visual"><span class="tile b"></span><span class="tile a"></span><span class="tile c"></span></div>
+        </article>
+        <article class="feature reveal" data-tilt>
+          <span class="feature-number">05 / Notes</span>
+          <h3>Private Quick Notes</h3>
+          <p>Keep short notes protected locally with Windows data protection and optional device authentication.</p>
+          <div class="feature-visual"><span class="tile a"></span><span class="tile c"></span></div>
+        </article>
+        <article class="feature reveal" data-tilt>
+          <span class="feature-number">06 / Appearance</span>
+          <h3>Make the layout yours</h3>
+          <p>Control widget visibility, transparency, accent, radius, blur, and placement from settings.</p>
+          <div class="feature-visual"><span class="tile c"></span><span class="tile b"></span><span class="tile a"></span></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="interlude shell" aria-label="Mosaic visual interlude">
+      <div>
+        <p class="eyebrow reveal">One system / many arrangements</p>
+        <div class="interlude-word" data-parallax-word>MOSAIC</div>
+        <p class="interlude-sub reveal">Move a few pieces and the surface changes. The product stays recognizable because the underlying system stays consistent.</p>
+      </div>
+      <div class="sweep-line"></div>
+      <div class="sweep-orb"></div>
+    </section>
+
+    <section class="section shell showcase" id="native">
+      <div class="section-head reveal">
+        <div>
+          <p class="eyebrow">02 / Product frame</p>
+          <h2>Real product. Real desktop.</h2>
+        </div>
+        <p class="intro">The marketing surface moves around the actual product instead of replacing it. The same calm depth used in the hero carries into the product frame below.</p>
+      </div>
+
+      <div class="showcase-stage">
+        <div class="showcase-bits" aria-hidden="true">
+          <span class="bit b1"></span><span class="bit b2"></span><span class="bit b3"></span><span class="bit b4"></span>
+        </div>
+        <figure class="showcase-frame" data-showcase>
+          <div class="showcase-back"></div>
+          <div class="showcase-front">
+            <img src="mosaic-dashboard.png" alt="Mosaic desktop widget dashboard showing tasks, pinned items and a photo widget" width="1140" height="650">
+            <div class="showcase-glint"></div>
+          </div>
+          <figcaption class="showcase-copy">
+            <strong>To Do / Pinned / Photo</strong>
+            <p>Rendered with Win32, Direct2D, Direct3D 11 and DirectComposition.</p>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section shell">
+      <div class="tech">
+        <div class="reveal">
+          <p class="eyebrow">03 / Built for Windows</p>
+          <h2>Native code. No browser runtime.</h2>
+          <div class="tech-stack" aria-label="Technology stack">
+            <span>C++20</span><span>Win32</span><span>Direct2D</span><span>Direct3D 11</span><span>DirectComposition</span><span>SQLite</span>
+          </div>
+        </div>
+        <div class="spec-list reveal">
+          <div class="spec-row"><div class="label">Runtime</div><div class="value">Native Windows application — no browser runtime.</div></div>
+          <div class="spec-row"><div class="label">Rendering</div><div class="value">Win32, Direct2D, Direct3D 11 and DirectComposition.</div></div>
+          <div class="spec-row"><div class="label">Storage</div><div class="value">Local SQLite database for everyday app data.</div></div>
+          <div class="spec-row"><div class="label">Motion</div><div class="value">Short active transitions, pointer parallax, and scroll-driven presentation effects.</div></div>
+          <div class="spec-row"><div class="label">Principle</div><div class="value">Keep the interface quiet. Let the details move.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="closing shell" aria-labelledby="privacy-title">
+      <div class="privacy reveal">
+        <div>
+          <p class="eyebrow">04 / Local by design</p>
+          <h2 id="privacy-title">Useful things stay close.</h2>
+          <p>Mosaic stores its everyday app data locally. Quick Notes can use Windows data protection, keeping the private layer tied to the device account rather than turning the desktop into another cloud service.</p>
+        </div>
+        <a class="button magnetic" href="https://github.com/nabakrishna/mosaic-widget#data-and-privacy">Data & privacy ↗</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell">
+    <div class="footer-inner">
+      <p>Mosaic — an open-source Windows desktop widget project.</p>
+      <nav class="footer-links" aria-label="Project links">
+        <a href="https://github.com/nabakrishna/mosaic-widget">GitHub</a>
+        <a href="https://github.com/nabakrishna/mosaic-widget/releases">Releases</a>
+        <a href="https://github.com/nabakrishna/mosaic-widget/blob/main/LICENSE">License</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const root = document.documentElement;
+      const progress = document.querySelector('.scroll-meter span');
+      const cursor = document.querySelector('.cursor-aura');
+      const scene = document.querySelector('[data-scene]');
+      const hero = document.querySelector('.hero-wrap');
+      const interludeWord = document.querySelector('[data-parallax-word]');
+      const showcase = document.querySelector('[data-showcase]');
+
+      /* Scroll meter that never needs layout work. */
+      const updateProgress = () => {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        progress.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
+      };
+      window.addEventListener('scroll', updateProgress, {passive:true});
+      window.addEventListener('resize', updateProgress);
+      updateProgress();
+
+      /* Pointer light + 3D hero steering. */
+      let px = innerWidth * .5, py = innerHeight * .5;
+      let tx = px, ty = py;
+      let raf = 0;
+      window.addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; }, {passive:true});
+      const pointerLoop = () => {
+        px += (tx - px) * .08;
+        py += (ty - py) * .08;
+        if (cursor) cursor.style.transform = `translate3d(${px}px,${py}px,0)`;
+        if (scene && hero && !reduce) {
+          const r = hero.getBoundingClientRect();
+          const inside = r.top < innerHeight && r.bottom > 0;
+          if (inside) {
+            const nx = ((tx - innerWidth * .5) / innerWidth) * 2;
+            const ny = ((ty - innerHeight * .5) / innerHeight) * 2;
+            scene.style.setProperty('--px', nx.toFixed(3));
+            scene.style.setProperty('--py', ny.toFixed(3));
+          }
+        }
+        raf = requestAnimationFrame(pointerLoop);
+      };
+      if (!reduce) raf = requestAnimationFrame(pointerLoop);
+
+      /* Magnetic buttons: the movement is tiny and elastic, not gimmicky. */
+      if (!reduce) {
+        document.querySelectorAll('.magnetic').forEach(el => {
+          el.addEventListener('pointermove', e => {
+            const r = el.getBoundingClientRect();
+            const x = (e.clientX - r.left - r.width / 2) * .12;
+            const y = (e.clientY - r.top - r.height / 2) * .18;
+            el.style.transform = `translate(${x}px,${y}px)`;
+          });
+          el.addEventListener('pointerleave', () => { el.style.transform = ''; });
+        });
+      }
+
+      /* High-density but very quiet ambient particle field. */
+      const canvas = document.getElementById('particleCanvas');
+      const ctx = canvas.getContext('2d', {alpha:true});
+      const dots = [];
+      const DPR = Math.min(window.devicePixelRatio || 1, 2);
+      function resizeCanvas() {
+        canvas.width = Math.round(innerWidth * DPR);
+        canvas.height = Math.round(innerHeight * DPR);
+        canvas.style.width = innerWidth + 'px';
+        canvas.style.height = innerHeight + 'px';
+        ctx.setTransform(DPR,0,0,DPR,0,0);
+      }
+      resizeCanvas();
+      for (let i=0; i<70; i++) dots.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.12,vy:(Math.random()-.5)*.1,r:Math.random()*1.4+.3,a:Math.random()*.18+.04});
+      window.addEventListener('resize', resizeCanvas);
+      let particleRAF = 0;
+      const particleLoop = () => {
+        ctx.clearRect(0,0,innerWidth,innerHeight);
+        if (!reduce) {
+          for (const p of dots) {
+            p.x += p.vx; p.y += p.vy;
+            if (p.x < -20) p.x = innerWidth+20; if (p.x > innerWidth+20) p.x=-20;
+            if (p.y < -20) p.y = innerHeight+20; if (p.y > innerHeight+20) p.y=-20;
+            const dx = p.x - px, dy = p.y - py, d = Math.hypot(dx,dy);
+            const influence = Math.max(0,1-d/260);
+            ctx.beginPath();
+            ctx.fillStyle = `rgba(104,120,255,${p.a + influence*.10})`;
+            ctx.arc(p.x + dx*influence*.02, p.y + dy*influence*.02, p.r + influence*.5, 0, Math.PI*2);
+            ctx.fill();
+          }
+        }
+        particleRAF = requestAnimationFrame(particleLoop);
+      };
+      if (!reduce) particleRAF = requestAnimationFrame(particleLoop);
+
+      const animate = () => {
+        if (reduce || !window.gsap) return;
+        gsap.registerPlugin(ScrollTrigger);
+
+        /* Hero: text enters, then the same object becomes the scroll narrator. */
+        gsap.to('.hero h1 .word', {y:'0%', duration:1.1, stagger:.08, ease:'power4.out', delay:.08});
+        gsap.from('.hero-desc, .hero-actions, .hero-meta', {y:22, opacity:0, duration:.85, stagger:.08, ease:'power3.out', delay:.42});
+
+        gsap.to('.scene', {
+          scrollTrigger:{trigger:'.hero', start:'top top', end:'bottom top', scrub:1.25},
+          x:'-=260', y:'+=110', z:-80,
+          rotationX:18, rotationY:24, rotationZ:8,
+          scale:.62,
+          ease:'none'
+        });
+        gsap.to('.scene-halo', {
+          scrollTrigger:{trigger:'.hero', start:'top top', end:'bottom top', scrub:1.25},
+          rotation:100, scale:.68, opacity:.35, ease:'none'
+        });
+        gsap.to('.orbit-ring', {
+          scrollTrigger:{trigger:'.hero', start:'top top', end:'bottom top', scrub:1.25},
+          rotationZ:210, scale:.74, ease:'none'
+        });
+        gsap.to('.hero-copy', {
+          scrollTrigger:{trigger:'.hero', start:'top top', end:'52% top', scrub:1},
+          y:-130, opacity:.16, ease:'none'
+        });
+        gsap.to('.scroll-cue', {
+          scrollTrigger:{trigger:'.hero', start:'top top', end:'18% top', scrub:true},
+          opacity:0, y:18
+        });
+
+        /* Feature reveal + elegant tilt interaction. */
+        gsap.utils.toArray('.reveal').forEach(el => {
+          gsap.fromTo(el, {y:34, opacity:0}, {y:0, opacity:1, duration:.9, ease:'power3.out', scrollTrigger:{trigger:el, start:'top 86%', once:true}});
+        });
+        if (innerWidth > 720) {
+          document.querySelectorAll('[data-tilt]').forEach(card => {
+            card.addEventListener('pointermove', e => {
+              const r = card.getBoundingClientRect();
+              const x = (e.clientX-r.left)/r.width-.5;
+              const y = (e.clientY-r.top)/r.height-.5;
+              gsap.to(card,{rotationY:x*5,rotationX:-y*5,x:x*3,y:y*3,duration:.45,ease:'power3.out',overwrite:true});
+            });
+            card.addEventListener('pointerleave',()=>gsap.to(card,{rotationY:0,rotationX:0,x:0,y:0,duration:.7,ease:'power3.out'}));
+          });
+        }
+
+        /* Huge editorial word sweeps sideways as the user crosses it. */
+        gsap.to(interludeWord, {
+          scrollTrigger:{trigger:'.interlude', start:'top bottom', end:'bottom top', scrub:1},
+          x:'22vw', rotationZ:-3, ease:'none'
+        });
+        gsap.to('.sweep-orb', {
+          scrollTrigger:{trigger:'.interlude', start:'top bottom', end:'bottom top', scrub:1},
+          x:'calc(100vw + 80px)', ease:'none'
+        });
+        gsap.to('.sweep-line', {
+          scrollTrigger:{trigger:'.interlude', start:'top bottom', end:'bottom top', scrub:1},
+          rotation:8, scaleX:1.18, ease:'none'
+        });
+
+        /* Product frame rises, turns, then settles flat — like placing a physical object down. */
+        gsap.fromTo(showcase,
+          {rotationX:28,rotationY:-18,rotationZ:-6,y:130,z:-160,scale:.78},
+          {rotationX:7,rotationY:-2,rotationZ:-1,y:0,z:0,scale:1,ease:'power3.out',
+           scrollTrigger:{trigger:showcase.closest('.showcase-stage'),start:'top 82%',end:'center 44%',scrub:1.1}}
+        );
+        gsap.to('.showcase-bits .bit', {y:-40, stagger:.07, ease:'none', scrollTrigger:{trigger:showcase.closest('.showcase-stage'),start:'top bottom',end:'bottom top',scrub:1}});
+
+        /* Copy subtly slides in opposite to the image to create depth. */
+        gsap.utils.toArray('.spec-row').forEach((row,i)=>{
+          gsap.from(row,{x:20,opacity:0,duration:.7,delay:i*.05,ease:'power3.out',scrollTrigger:{trigger:row,start:'top 88%',once:true}});
+        });
+      };
+
+      if (document.readyState === 'complete') animate();
+      else window.addEventListener('load', animate, {once:true});
+
+      /* Extra hero pointer depth without changing the scroll narrative. */
+      if (!reduce && scene) {
+        const baseX = -13, baseY = 8;
+        const updateDepth = () => {
+          const nx = parseFloat(scene.style.getPropertyValue('--px')) || 0;
+          const ny = parseFloat(scene.style.getPropertyValue('--py')) || 0;
+          const scroll = Math.min(window.scrollY / Math.max(1, hero.offsetHeight), 1);
+          scene.style.transform = `translate3d(${150 - scroll*220}px, ${28 + scroll*110}px, ${-scroll*80}px) rotateX(${baseY + -ny*5 + scroll*10}deg) rotateY(${baseX + nx*7 + scroll*28}deg) rotateZ(${-2 + scroll*10}deg) scale(${.88 - scroll*.22})`;
+        };
+        window.addEventListener('scroll',updateDepth,{passive:true});
+        window.addEventListener('pointermove',updateDepth,{passive:true});
+      }
+    })();
+  </script>
+</body>
+</html>
