@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //new code for modification on 27-09-2026
 #include "ui/SettingsPanel.h"
 #include "ui/Icons.h"

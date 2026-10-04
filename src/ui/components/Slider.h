@@ -5,11 +5,6 @@
 
 namespace mosaic::ui::components {
 
-// Horizontal slider backing Settings rows like the transparency 0–100%
-// control from spec section 19. Value is normalized to [0, 1]; callers
-// (Phase 7's Settings panel) map that to whatever real range they need
-// (percentage, seconds, degrees) themselves — keeping this class free of
-// per-setting knowledge.
 class Slider {
 public:
     void SetBounds(D2D1_RECT_F bounds) { m_bounds = bounds; }
@@ -22,10 +17,6 @@ public:
         return point.x >= m_bounds.left && point.x <= m_bounds.right &&
                point.y >= m_bounds.top - 6.0f && point.y <= m_bounds.bottom + 6.0f;
     }
-
-    // Converts an x coordinate (already known to be within/near the track,
-    // typically because HitTest passed) into a value and stores it. Called
-    // continuously during a drag from WM_MOUSEMOVE while the button is down.
     void SetValueFromPointerX(float x) {
         float width = m_bounds.right - m_bounds.left;
         if (width <= 0.0f) return;

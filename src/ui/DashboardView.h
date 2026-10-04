@@ -30,34 +30,6 @@ struct DashboardHeaderData {
     std::wstring fullDate;       // "9 Sep 2026"
 };
 
-// As of Phase 6, DashboardView owns the real adaptive grid: it runs the
-// LayoutEngine to turn grid-unit placements into DIP rects, persists
-// layout changes through LayoutRepository, and implements whole-widget
-// drag-and-drop directly (rather than pushing that state machine up into
-// Window, which stays a thin input-forwarding shell).
-//
-// The click-vs-drag problem: a mouse-down on a card could mean "I want to
-// click the checkbox under my cursor" or "I want to drag this whole card
-// somewhere else." This is resolved the standard way — a mouse-down never
-// immediately dispatches a click. Instead:
-//   - OnLButtonDown remembers which widget was hit and enters a "pending"
-//     state, but does NOT call the widget's OnLButtonDown yet.
-//   - OnMouseMove, while pending, watches for movement past a small
-//     threshold. Cross it, and this becomes a real drag: the pending
-//     click is abandoned entirely (the widget never sees it), and every
-//     further mouse-move updates a live drag preview via LayoutEngine.
-//   - OnLButtonUp is where it resolves: if a drag was happening, the drop
-//     is committed and persisted. If it never crossed the threshold, the
-//     original click is dispatched *now*, to whatever widget was
-//     originally hit — checkboxes, delete buttons, and everything else
-//     work exactly as before, just resolved on release instead of press.
-//
-// As of Phase 7, DashboardView also owns the SettingsPanel — clicking the
-// gear button opens it, and every input method here checks
-// m_settingsPanel.IsOpen() first and routes there instead of normal
-// dashboard processing when it's true. The panel behaves modally: while
-// open, drags, clicks, and keystrokes all go to it, never to the widgets
-// underneath.
 class DashboardView {
 public:
     DashboardView(IDWriteFactory* dwriteFactory, const ThemeManager* theme,

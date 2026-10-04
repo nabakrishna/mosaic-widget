@@ -4,13 +4,6 @@
 #include "ui/Icons.h"
 
 namespace mosaic::ui::components {
-
-// A small circular button (used for the header's settings gear today; the
-// same class will back the Settings panel's close button and any future
-// per-widget icon actions). Unlike Phase 1's placeholder circle, this one
-// actually tracks hover/pressed state and can be hit-tested against real
-// mouse coordinates — Window forwards WM_MOUSEMOVE/WM_LBUTTONDOWN into
-// whichever IconButtons the current view owns.
 class IconButton {
 public:
     void SetBounds(D2D1_POINT_2F center, float radius) { m_center = center; m_radius = radius; }

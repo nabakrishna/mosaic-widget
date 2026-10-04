@@ -3,12 +3,6 @@
 #include "ui/Theme.h"
 
 namespace mosaic::ui::components {
-
-// A pill-shaped on/off switch, the standard control for every boolean
-// Settings row (spec sections 19–27 are full of "[✓] ..." checkboxes —
-// this is what renders those). Not exercised by the dashboard itself yet;
-// it's built now, correctly and completely, because Settings (Phase 7)
-// needs a working control library on day one rather than a rewrite.
 class Toggle {
 public:
     void SetBounds(D2D1_RECT_F bounds) { m_bounds = bounds; }
