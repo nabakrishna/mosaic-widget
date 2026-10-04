@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f4f3ef" />
+  <meta name="description" content="Privacy and data information for the Mosaic desktop app and website." />
+  <title>Privacy &amp; Data Policy — Mosaic</title>
+  <style>
+    :root { color-scheme: light; --ink: #171717; --muted: #66635f; --accent: #ec0a86; --line: rgba(21, 21, 21, .12); }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 36px 20px 64px; background: #f4f3ef; color: var(--ink); font: 16px/1.7 "Segoe UI", Arial, sans-serif; }
+    main { width: min(760px, 100%); margin: auto; }
+    .eyebrow { margin: 0 0 8px; color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(32px, 7vw, 48px); line-height: 1.1; letter-spacing: -.04em; }
+    .updated { margin: 12px 0 28px; color: var(--muted); font-size: 14px; }
+    .notice { padding: 16px 18px; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; background: rgba(255, 255, 255, .65); }
+    section { padding: 22px 0; border-bottom: 1px solid var(--line); }
+    h2 { margin: 0 0 8px; font-size: 20px; letter-spacing: -.02em; }
+    p { margin: 0 0 12px; }
+    p:last-child { margin-bottom: 0; }
+    a { color: #a9005e; text-underline-offset: 3px; }
+    figure { margin: 18px 0 0; }
+    figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 12px; }
+    figcaption { margin-top: 8px; color: var(--muted); font-size: 13px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .actions a, .actions button { padding: 10px 15px; border: 1px solid var(--line); border-radius: 999px; background: white; color: var(--ink); font: inherit; text-decoration: none; cursor: pointer; }
+    .actions a:hover, .actions button:hover { border-color: var(--accent); }
+    @media print { body { padding: 0; background: white; } .actions { display: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Mosaic</p>
+    <h1>Privacy &amp; Data Policy</h1>
+    <p class="updated">Last updated: October 4, 2026</p>
+
+    <p class="notice">This policy describes the privacy and storage details shown in Mosaic’s Privacy &amp; Data settings screen. App behavior may change between versions; check the settings in the version you use for the current details.</p>
+
+    <section>
+      <h2>Desktop app data stays on your PC</h2>
+      <p>Mosaic stores your tasks, pins, activities, notes, and settings in a local database on your computer. The settings screen identifies the database location as <code>%LOCALAPPDATA%\Mosaic\mosaic.db</code>. It states that Mosaic has no account or cloud-sync service and does not connect to the internet for this app data.</p>
+    </section>
+
+    <section>
+      <h2>Quick Notes protection</h2>
+      <p>The settings screen says Quick Notes are encrypted with Windows Data Protection before they are saved. The optional Mosaic password controls access inside the app; it is not the encryption key and is not stored as a password. A salted hash is stored instead.</p>
+      <p>Notes are tied to the Windows account used to protect them. The settings screen warns that someone already signed in to that Windows account may still be able to open them, so protect your Windows account and lock your PC when you step away.</p>
+    </section>
+
+    <section>
+      <h2>Photos and selected folders</h2>
+      <p>Mosaic reads images from the folder you select for the Image Box. According to the settings screen, it does not move, edit, or delete those images.</p>
+    </section>
+
+    <section>
+      <h2>Deleting app data</h2>
+      <p>The settings screen identifies <code>%LOCALAPPDATA%\Mosaic\mosaic.db</code> as the data file. Closing Mosaic and deleting that file erases the stored Mosaic data, and the deletion cannot be undone. Back up anything you want to keep before removing it.</p>
+    </section>
+
+    <section>
+      <h2>Website and external resources</h2>
+      <p>The Mosaic website loads the Outfit font from Google Fonts. When your browser requests those font files, Google may receive technical request information such as your IP address and browser details. Review <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google’s Privacy Policy</a> for how Google handles that information.</p>
+    </section>
+
+    <figure>
+      <img src="assets/p&amp;c.png" alt="Mosaic Privacy &amp; Data settings screen" />
+      <figcaption>The Privacy &amp; Data information shown in Mosaic settings.</figcaption>
+    </figure>
+
+    <div class="actions">
+      <a href="index.html">Back to Mosaic</a>
+      <button type="button" id="print-page">Print this page</button>
+    </div>
+  </main>
+  <script>
+    document.getElementById("print-page").addEventListener("click", () => window.print());
+  </script>
+</body>
+</html>
