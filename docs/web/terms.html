@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f4f3ef" />
+  <meta name="description" content="Terms of use and open-source license information for Mosaic." />
+  <title>Terms of Use — Mosaic</title>
+  <style>
+    :root { color-scheme: light; --ink: #171717; --muted: #66635f; --accent: #ec0a86; --line: rgba(21, 21, 21, .12); }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 36px 20px 64px; background: #f4f3ef; color: var(--ink); font: 16px/1.7 "Segoe UI", Arial, sans-serif; }
+    main { width: min(760px, 100%); margin: auto; }
+    .eyebrow { margin: 0 0 8px; color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(32px, 7vw, 48px); line-height: 1.1; letter-spacing: -.04em; }
+    .updated { margin: 12px 0 28px; color: var(--muted); font-size: 14px; }
+    .notice { padding: 16px 18px; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; background: rgba(255, 255, 255, .65); }
+    section { padding: 22px 0; border-bottom: 1px solid var(--line); }
+    h2 { margin: 0 0 8px; font-size: 20px; letter-spacing: -.02em; }
+    p { margin: 0 0 12px; }
+    p:last-child { margin-bottom: 0; }
+    a { color: #a9005e; text-underline-offset: 3px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .actions a, .actions button { padding: 10px 15px; border: 1px solid var(--line); border-radius: 999px; background: white; color: var(--ink); font: inherit; text-decoration: none; cursor: pointer; }
+    .actions a:hover, .actions button:hover { border-color: var(--accent); }
+    @media print { body { padding: 0; background: white; } .actions { display: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Mosaic</p>
+    <h1>Terms of Use</h1>
+    <p class="updated">Last updated: October 4, 2026</p>
+
+    <p class="notice">This page summarizes the open-source terms applicable to the Mosaic project. It is not a replacement for the complete license. If this summary differs from the project license, the <a href="../../LICENSE" target="_blank" rel="noopener">Apache License, Version 2.0</a> governs use, reproduction, and distribution of the licensed project code.</p>
+
+    <section>
+      <h2>Using and sharing the project</h2>
+      <p>The project is made available under Apache License 2.0. Subject to that license, it grants permissions to use, reproduce, modify, and distribute the covered work. The license also contains a patent-license grant and conditions for redistribution.</p>
+      <p>If you redistribute the work or a derivative, follow the license conditions. These include providing a copy of the license, marking modified files, and retaining applicable copyright, patent, trademark, and attribution notices. Additional requirements may apply if the distribution includes a NOTICE file.</p>
+      <p><a href="../../LICENSE" target="_blank" rel="noopener">Read the complete LICENSE file</a>.</p>
+    </section>
+
+    <section>
+      <h2>Names and trademarks</h2>
+      <p>The open-source license does not grant general permission to use project names, product names, or trademarks. Any permitted descriptive use remains subject to the license and applicable law.</p>
+    </section>
+
+    <section>
+      <h2>Warranty and liability</h2>
+      <p>The project is provided on an “as is” basis, without warranties, to the extent allowed by applicable law. The license limits contributor liability as stated in its full text. Nothing on this page removes rights or protections that cannot legally be excluded.</p>
+    </section>
+
+    <section>
+      <h2>Contributions</h2>
+      <p>Contributions submitted for inclusion in the project are covered by Apache License 2.0 unless the contributor clearly states different terms or a separate written agreement applies.</p>
+    </section>
+
+    <div class="actions">
+      <a href="index.html">Back to Mosaic</a>
+      <button type="button" id="print-page">Print this page</button>
+    </div>
+  </main>
+  <script>
+    document.getElementById("print-page").addEventListener("click", () => window.print());
+  </script>
+</body>
+</html>
