@@ -16,12 +16,6 @@ bool HasSupportedExtension(const std::wstring& filename) {
            ext == L"webp" || ext == L"bmp";
 }
 
-// Recursively walks `dir`, appending matching file paths to `outFiles`.
-// This is pure filesystem-metadata enumeration (FindFirstFile/FindNextFile)
-// — no file content is opened or read here, only names and the
-// FILE_ATTRIBUTE_DIRECTORY bit, which is what keeps this "lazy" per the
-// class comment: even a folder with thousands of photos costs only a
-// FindNextFile call per entry, not a decode.
 void ScanRecursive(const std::wstring& dir, std::vector<std::wstring>& outFiles, int depthRemaining) {
     if (depthRemaining <= 0) return; // guards against pathological symlink loops
 

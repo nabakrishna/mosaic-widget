@@ -10,25 +10,6 @@ namespace mosaic::media {
 
 namespace {
 
-// Decodes `path`, scales to "cover" `targetW`x`targetH` (fills the whole
-// target rect, center-cropping the overflow — matches spec section 21's
-// default Image Fit: Cover), and returns straight 32bpp premultiplied-BGRA
-// pixels sized exactly targetW*targetH*4 bytes.
-//
-// Memory strategy (spec section 9's "CRITICAL MEMORY REQUIREMENT"):
-// this tries a fast path first — IWICBitmapSourceTransform lets certain
-// decoders (JPEG's DCT-scaled decode is the practically-important one)
-// produce a natively downscaled frame without ever materializing the
-// full-resolution bitmap in memory. When that path isn't available or
-// fails for any reason (format doesn't support it, negotiated format
-// wasn't what we asked for, anything), this falls back to the always-
-// correct path: convert the frame at its native resolution, then scale.
-// That fallback path's peak CPU memory is proportional to the *source*
-// image's resolution, not the display size — an honestly-documented
-// trade-off, not a silent one. In practice the fast path covers the
-// common case (photos are almost always JPEG), and even the fallback
-// path's buffer is freed within this one function call, well before
-// anything reaches the GPU-upload step.
 HRESULT DecodeAndScaleCover(IWICImagingFactory* factory, const std::wstring& path,
                              UINT targetW, UINT targetH,
                              std::vector<uint8_t>& outPixels, UINT& outW, UINT& outH) {
@@ -82,9 +63,7 @@ HRESULT DecodeAndScaleCover(IWICImagingFactory* factory, const std::wstring& pat
                     workingH = closeH;
                 }
             }
-            // `reduced` (the only full-resolution-sized-or-larger CPU buffer
-            // this function may have allocated) goes out of scope here
-            // regardless of which branch was taken — never held past this point.
+
         }
     }
 

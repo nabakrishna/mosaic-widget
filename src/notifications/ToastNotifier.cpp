@@ -16,13 +16,6 @@ namespace mosaic::notifications {
 
 namespace {
 
-// Escapes the handful of characters that are meaningful inside XML element
-// text. Activity titles are free-typed user text (see ActivityWidget) and
-// could easily contain '&' or '<' — an unescaped one would make the toast
-// XML fail to parse, which Show() would otherwise swallow silently and the
-// user would just never see their reminder. Escaping properly means a
-// title like "Gym & Swim" shows up exactly as typed instead of either
-// breaking the toast or silently mangling the text.
 std::wstring EscapeXml(const std::wstring& text) {
     std::wstring out;
     out.reserve(text.size());
@@ -48,14 +41,6 @@ const wchar_t* ToastNotifier::AppUserModelId() {
 void ToastNotifier::EnsureAppIdentity() {
     SetCurrentProcessExplicitAppUserModelID(AppUserModelId());
 
-    // HKCU\Software\Classes\AppUserModelId\<AUMID>\DisplayName is what
-    // makes an unpackaged Win32 app's toast show "Mosaic" as the sender
-    // instead of a generic or blank name — this is Microsoft's documented
-    // workaround for apps without an MSIX identity. Failure here (e.g. no
-    // registry write permission in some locked-down environment) is not
-    // fatal: the toast can still fire, it'll just show a less friendly
-    // name, so we don't check/report the result any further than logging
-    // would in a debug build.
     std::wstring keyPath = std::wstring(L"Software\\Classes\\AppUserModelId\\") + AppUserModelId();
     HKEY hKey = nullptr;
     if (RegCreateKeyExW(HKEY_CURRENT_USER, keyPath.c_str(), 0, nullptr, 0,

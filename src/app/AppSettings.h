@@ -7,16 +7,7 @@
 
 namespace mosaic::app {
 
-// Every setting Mosaic currently has real, functional behavior for. This
-// covers 6 of spec sections 19–27's 12 categories (Appearance, Widget
-// Layout, Photo & Media, Desktop, Performance, plus About which has
-// nothing to store) — see README's Phase 7 notes for exactly which
-// categories are and aren't wired up, and why. Loaded once at startup,
-// mutated in place as Settings controls change, and immediately persisted
-// back to SettingsRepository on every change — there's no separate
-// "unsaved changes" state or explicit Save button, matching how every
-// other real control in Mosaic (To Do, Activity, layout position) already
-// behaves.
+
 struct AppSettings {
     // --- Appearance ---------------------------------------------------
     float transparency = 0.55f;      // maps directly to ThemeColors::cardFill.a
@@ -68,12 +59,6 @@ struct AppSettings {
     void SaveTo(data::SettingsRepository& repo) const;
 };
 
-// Maps `settings`' appearance values onto a live ThemeManager, in place.
-// Called once at startup and again after every Appearance change, so the
-// dashboard reflects the new look on the very next repaint without
-// rebuilding any device resources (colors and metrics are read fresh from
-// the theme on every Draw; only text formats are cached, and none of these
-// settings touch typography).
 void ApplyThemeSettings(const AppSettings& settings, ui::ThemeManager& theme);
 
 } // namespace mosaic::app
