@@ -1,4 +1,3 @@
-
 :root {
   --bg: #f5f8f6;
   --surface: #fafcfb;
@@ -405,3 +404,95 @@ h1 em, h2 span, h3 span { font-style: normal; color: #777; }
   .download { min-height: 470px; }
   .download h2 { font-size: clamp(45px, 5.4vw, 76px); }
 }
+
+.labu-mascot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 35;
+  display: block;
+  width: 108px;
+  height: 144px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  pointer-events: none;
+  will-change: transform;
+}
+.labu-mascot:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 18px; }
+.labu-wrap { position: relative; display: block; width: 100%; height: 100%; transform-origin: 50% 100%; animation: labu-bob 2.2s ease-in-out infinite; transition: transform .45s cubic-bezier(.22,1,.36,1); }
+.labu-wrap img, .labu-expression { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.labu-wrap img { -webkit-user-drag: none; user-select: none; pointer-events: none; }
+.labu-expression { overflow: visible; pointer-events: none; }
+.labu-bubble { position: absolute; bottom: 100%; left: 50%; z-index: 1; width: max-content; max-width: 190px; padding: 7px 11px; transform: translateX(-50%); border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink); box-shadow: 0 3px 10px rgba(0,0,0,.16); font-size: 13px; line-height: 1.35; pointer-events: none; }
+.labu-bubble[hidden] { display: none; }
+.labu-mascot .labu-eyes-closed,
+.labu-mascot .labu-sad-mouth,
+.labu-mascot .labu-smile,
+.labu-mascot .labu-sad-face,
+.labu-mascot .labu-tears,
+.labu-mascot .labu-sparkles,
+.labu-mascot .labu-pointing,
+.labu-mascot .labu-wave { display: none; }
+.labu-mascot[data-m="laugh"] .labu-eyes-closed,
+.labu-mascot[data-m="laugh"] .labu-smile,
+.labu-mascot[data-m="laugh"] .labu-sparkles,
+.labu-mascot[data-m="wave"] .labu-smile,
+.labu-mascot[data-m="wave"] .labu-wave,
+.labu-mascot[data-m="point"] .labu-smile,
+.labu-mascot[data-m="point"] .labu-pointing,
+.labu-mascot[data-m="sad"] .labu-sad-mouth,
+.labu-mascot[data-m="sad"] .labu-sad-face,
+.labu-mascot[data-m="sad"] .labu-tears { display: block; }
+.labu-mascot[data-m="laugh"] .labu-pupils,
+.labu-mascot[data-m="sad"] .labu-pupils { display: none; }
+.labu-mascot.run .labu-wrap { animation: labu-hop .3s ease-in-out infinite; }
+.labu-mascot[data-m="wave"] .labu-wrap { animation: labu-sway 1s ease-in-out infinite; }
+.labu-mascot[data-m="sad"] .labu-wrap { animation: none; rotate: -4deg; translate: 0 3px; }
+.labu-mascot.pose-curious .labu-wrap { transform: rotate(-7deg) scale(.96, 1.03); }
+.labu-mascot.pose-thinking .labu-wrap { transform: rotate(5deg) scale(.98, 1.02); }
+.labu-mascot.pose-proud .labu-wrap { transform: rotate(4deg) scale(1.04, .97); }
+.labu-mascot.pose-dance .labu-wrap { animation: labu-dance 1s ease-in-out infinite; }
+@keyframes labu-bob { 50% { translate: 0 -3px; } }
+@keyframes labu-hop { 50% { translate: 0 -14px; } }
+@keyframes labu-sway { 50% { rotate: 3deg; } }
+@keyframes labu-dance { 25% { rotate: -7deg; translate: -2px -4px; } 75% { rotate: 7deg; translate: 2px -4px; } }
+
+@media (max-width: 760px) {
+  .labu-mascot { width: 78px; height: 104px; }
+  .labu-bubble { max-width: 160px; font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .labu-wrap { animation: none !important; }
+}
+/* Labu: mirrored hand, sitting, sleeping, dizzy */
+.labu-mascot.flip .labu-wrap { scale: -1 1; }
+.labu-mascot .labu-asleep, .labu-mascot .labu-sit { display: none; }
+.labu-mascot[data-m="sleep"] .labu-asleep,
+.labu-mascot[data-m="sleep"] .labu-eyes-closed,
+.labu-mascot[data-m="sleep"] .labu-smile { display: block; }
+.labu-mascot[data-m="sleep"] .labu-pupils { display: none; }
+.labu-mascot.pose-sit .labu-sit { display: block; }
+.labu-mascot.pose-sit .labu-wrap img { clip-path: inset(0 0 11.7% 0); }
+.labu-mascot.pose-sit .labu-wrap { transform: scaleY(.96); animation: labu-sit 3.2s ease-in-out infinite; }
+.labu-mascot.pose-sit[data-m="sad"] .labu-wrap { rotate: -5deg; }
+/* sleeping: lie flat and drift like a river current */
+.labu-mascot.pose-float .labu-wrap { transform-origin: 50% 50%; rotate: -90deg; animation: labu-float 4.2s ease-in-out infinite; }
+/* crying: lie flat and sob */
+.labu-mascot.pose-lie[data-m] .labu-wrap { transform-origin: 50% 50%; rotate: -90deg; translate: 0 0; animation: labu-sob 1.1s ease-in-out infinite; }
+.labu-mascot.pose-dizzy .labu-wrap { animation: labu-dizzy .5s ease-in-out infinite; }
+@keyframes labu-sit { 0%,100% { translate: 0 3%; } 50% { translate: 0 2.4%; } }
+@keyframes labu-float { 0%,100% { translate: 0 -5px; rotate: -93deg; } 50% { translate: 0 6px; rotate: -86deg; } }
+@keyframes labu-sob { 0%,100% { translate: 0 0; } 50% { translate: 0 3px; } }
+@keyframes labu-dizzy { 25% { rotate: -8deg; } 75% { rotate: 8deg; } }
+.labu-zzz { display: none; position: absolute; top: 8px; right: 4px; pointer-events: none; }
+.labu-mascot[data-m="sleep"] .labu-zzz { display: block; }
+.labu-mascot.pose-float .labu-zzz { top: -12px; right: auto; left: 30%; }
+.labu-zzz i { position: absolute; opacity: 0; color: var(--accent); font: 700 14px/1 "Outfit", sans-serif; animation: labu-z 2.4s ease-in-out infinite; }
+.labu-zzz i:nth-child(2) { font-size: 17px; animation-delay: .8s; }
+.labu-zzz i:nth-child(3) { font-size: 21px; animation-delay: 1.6s; }
+@keyframes labu-z { 0% { opacity: 0; translate: 0 10px; } 30% { opacity: 1; } 100% { opacity: 0; translate: 14px -26px; } }

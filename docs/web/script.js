@@ -1049,6 +1049,516 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ---------------------------------------------------------
+     LABU MASCOT
+  --------------------------------------------------------- */
+
+  const mascot =
+    document.getElementById("labu-mascot");
+  const mascotBubble =
+    document.getElementById("labu-bubble");
+  const mascotPupils =
+    mascot?.querySelector(".labu-pupils");
+
+  if (mascot && mascotBubble && mascotPupils) {
+    const targetSelector =
+      'a, button, input, textarea, select, summary, [role="button"], main > section, .site-header, .site-footer, .footer-brand, .platform-row, .feature, .orbit-card, .screenshot, .faq-item, .source-list > div, .stats > div, .testimonial-card, .imagebox-browser, .hero-copy, .story-copy, .performance-copy, .download-inner';
+    const getHoverTarget = (target) => {
+      if (!(target instanceof Element) || mascot.contains(target)) return null;
+      return target.closest(targetSelector);
+    };
+    const mascotSize = () => {
+      const rect = mascot.getBoundingClientRect();
+      return { width: rect.width, height: rect.height };
+    };
+    function positionBubble() {
+      if (mascotBubble.hidden) return;
+
+      const mascotRect = mascot.getBoundingClientRect();
+      const bubbleRect = mascotBubble.getBoundingClientRect();
+      const preferredLeft = mascotRect.width / 2 - bubbleRect.width / 2;
+      const minLeft = 8 - mascotRect.left;
+      const maxLeft =
+        window.innerWidth - bubbleRect.width - 8 - mascotRect.left;
+
+      mascotBubble.style.left =
+        `${Math.max(minLeft, Math.min(maxLeft, preferredLeft))}px`;
+      mascotBubble.style.transform = "none";
+
+      if (mascotRect.top - bubbleRect.height >= 8) {
+        mascotBubble.style.top = "auto";
+        mascotBubble.style.bottom = "100%";
+      } else {
+        mascotBubble.style.top = `${mascotRect.height + 8}px`;
+        mascotBubble.style.bottom = "auto";
+      }
+    }
+    const size = mascotSize();
+    let x = Math.max(8, window.innerWidth - size.width - 16);
+    let y = Math.max(72, window.innerHeight - size.height - 16);
+    let targetX = x;
+    let targetY = y;
+    let pointerX = x;
+    let pointerY = y;
+    let mode = "idle";
+    let currentTarget = null;
+    let hasPointerPosition = false;
+    let nextRunAt = 0;
+    let moodTimer = 0;
+    let idleTimer = 0;
+    let clicks = [];
+    let hoverRefreshFrame = 0;
+    let rest = "";
+    let restBy = "";
+    let facing = false;
+    let lastActivity = Date.now();
+    let lastDizzy = 0;
+    let cheers = 0;
+    let away = 0;
+    let awayTimers = [];
+    let exitPoint = { x: 0, y: 0 };
+    let sectionKey = "hero";
+    const hour = new Date().getHours();
+    const night = hour >= 22 || hour < 5;
+
+    function showMascotMood(
+      mood,
+      message,
+      movement,
+      duration = 0,
+      pose = "",
+      running = false
+    ) {
+      window.clearTimeout(moodTimer);
+      rest = "";
+      mascot.dataset.m = mood;
+      mascot.classList.toggle("run", running);
+      mascot.classList.remove(
+        "pose-curious",
+        "pose-thinking",
+        "pose-proud",
+        "pose-dance",
+        "pose-sit",
+        "pose-float",
+        "pose-lie",
+        "pose-dizzy"
+      );
+      if (pose) mascot.classList.add(`pose-${pose}`);
+      mode = movement;
+      mascotBubble.textContent = message;
+      mascotBubble.hidden = !message;
+      positionBubble();
+      if (reduceMotion) animateMascot();
+
+      if (duration > 0) {
+        moodTimer = window.setTimeout(() => {
+          if (currentTarget?.isConnected) {
+            placeBeside(currentTarget);
+            showMascotMood(
+              "point",
+              getTargetMessage(currentTarget),
+              "point"
+            );
+          } else {
+            showMascotMood("happy", "", "idle");
+          }
+        }, duration);
+      }
+    }
+
+    // sit / sleep until the visitor comes back
+    function settle(kind, message) {
+      currentTarget = null;
+      clearAway();
+      facing = false;
+      showMascotMood(
+        kind === "sleep" ? "sleep" : "happy",
+        message,
+        kind === "sleep" ? "float" : "idle",
+        0,
+        kind === "sleep" ? "float" : kind
+      );
+      rest = kind;
+      restBy = "idle";
+      if (message) {
+        window.setTimeout(() => {
+          if (rest === kind) mascotBubble.hidden = true;
+        }, 2600);
+      }
+    }
+
+    function wake(message) {
+      lastActivity = Date.now();
+      if (!rest) return;
+      showMascotMood("laugh", message, "idle", 1600, "", !reduceMotion);
+    }
+
+    function clearAway() {
+      awayTimers.forEach((id) => window.clearTimeout(id));
+      awayTimers = [];
+      away = 0;
+    }
+
+    // cursor left the window: look around, wait sadly, then lie down and cry
+    function startAway(event) {
+      if (away || document.hidden || event.relatedTarget) return;
+      exitPoint = {
+        x: Math.max(0, Math.min(window.innerWidth, event.clientX)),
+        y: Math.max(0, Math.min(window.innerHeight, event.clientY))
+      };
+      currentTarget = null;
+      showMascotMood("happy", "Where did you go? 🥺", reduceMotion ? "idle" : "run", 0, "", !reduceMotion);
+      away = 1;
+      awayTimers.push(window.setTimeout(() => {
+        const { width, height } = mascotSize();
+        targetX = exitPoint.x <= 0 ? 0 : exitPoint.x >= window.innerWidth ? window.innerWidth - width : exitPoint.x - width / 2;
+        targetY = exitPoint.y <= 0 ? 56 : exitPoint.y >= window.innerHeight ? window.innerHeight - height : exitPoint.y - height / 2;
+        showMascotMood("sad", "I'll wait right here… 😢", "stay", 0, "sit");
+        away = 2;
+      }, 2000));
+      awayTimers.push(window.setTimeout(() => {
+        showMascotMood("sad", "I miss you… please come back 😭", "stay", 0, "lie");
+        away = 3;
+      }, 6000));
+    }
+
+    function noteActivity() {
+      lastActivity = Date.now();
+      cheers = 0;
+      if (away) {
+        const crying = away === 3;
+        clearAway();
+        showMascotMood("laugh", crying ? "You came back! 🥹" : "There you are! 🥰", "idle", 2000, "", !reduceMotion);
+        return;
+      }
+      if (rest === "sleep") wake("Oh! You're back! 👋");
+      else if (rest === "sit") showMascotMood("happy", "", "idle");
+    }
+
+    function getTargetMessage(element) {
+      if (element.dataset.labuTip) return element.dataset.labuTip;
+
+      const label =
+        element.getAttribute("aria-label") ||
+        element.getAttribute("title") ||
+        element.querySelector("h1, h2, h3, h4")?.textContent ||
+        (element.matches("input, textarea")
+          ? element.getAttribute("placeholder")
+          : element.innerText || element.textContent);
+      const normalizedLabel = label?.replace(/\s+/g, " ").trim();
+      const cleanLabel = normalizedLabel?.length > 72
+        ? `${normalizedLabel.slice(0, 69).trimEnd()}…`
+        : normalizedLabel;
+
+      if (element.matches("input, textarea, select")) {
+        return cleanLabel
+          ? `You can use this ${cleanLabel.toLowerCase()}! ✨`
+          : "Try typing something here! ✨";
+      }
+
+      if (element.matches("a, button, [role='button']")) {
+        return cleanLabel
+          ? `Want to try ${cleanLabel}? 👆`
+          : "Tap here to explore! 👆";
+      }
+
+      return cleanLabel
+        ? `Here's ${cleanLabel}! ✨`
+        : "Take a look at this part of Mosaic! ✨";
+    }
+
+    function reactToMascotClick() {
+      const now = Date.now();
+      lastActivity = now;
+      if (rest === "sleep") {
+        showMascotMood("laugh", "Hey, I was napping! 😝", "idle", 1800, "", !reduceMotion);
+        return;
+      }
+      clicks = clicks.filter((time) => now - time < 1500);
+      clicks.push(now);
+
+      if (clicks.length >= 4) {
+        clicks = [];
+        showMascotMood("sad", "Ouch! That tickles… 😢", "idle", 2600);
+      } else {
+        showMascotMood("laugh", "Hehe! 😄", "idle", 900);
+      }
+    }
+
+    function isOverMascot(x, y) {
+      const rect = mascot.getBoundingClientRect();
+      return x >= rect.left && x <= rect.right &&
+        y >= rect.top && y <= rect.bottom;
+    }
+
+    function placeBeside(element) {
+      const rect = element.getBoundingClientRect();
+      const { width, height } = mascotSize();
+      const left = rect.left > width + 16
+        ? rect.left - width + 18
+        : Math.min(window.innerWidth - width, rect.right + 12);
+
+      facing = !(rect.left > width + 16);
+      targetX = left;
+      targetY = rect.top + rect.height / 2 - height / 2;
+    }
+
+    function updateHoverTarget(element) {
+      if (element === currentTarget) return;
+      currentTarget = element;
+
+      if (!element) {
+        if (mode === "point") showMascotMood("happy", "", "idle");
+        return;
+      }
+
+      placeBeside(element);
+      showMascotMood("point", getTargetMessage(element), "point");
+    }
+
+    function refreshHoverTarget() {
+      if (!hasPointerPosition || hoverRefreshFrame) return;
+
+      hoverRefreshFrame = window.requestAnimationFrame(() => {
+        hoverRefreshFrame = 0;
+        updateHoverTarget(
+          getHoverTarget(document.elementFromPoint(pointerX, pointerY))
+        );
+      });
+    }
+
+    function animateMascot() {
+      const { width, height } = mascotSize();
+
+      if (mode === "follow") {
+        targetX = pointerX + 26;
+        targetY = pointerY + 22;
+      } else if (mode === "float") {
+        const t = performance.now() / 1000;
+        targetX = (window.innerWidth - width) / 2 + Math.sin(t * 0.35) * (window.innerWidth - width) * 0.38;
+        targetY = window.innerHeight * 0.5 - height / 2 + Math.sin(t * 0.9) * 22;
+      } else if (mode === "run" && performance.now() >= nextRunAt) {
+        targetX = Math.random() * Math.max(1, window.innerWidth - width);
+        targetY = 64 + Math.random() * Math.max(1, window.innerHeight - height - 64);
+        nextRunAt = performance.now() + 700;
+      }
+
+      targetX = Math.max(0, Math.min(window.innerWidth - width, targetX));
+      targetY = Math.max(48, Math.min(window.innerHeight - height, targetY));
+      if (reduceMotion) {
+        x = targetX;
+        y = targetY;
+      } else {
+        x += (targetX - x) * (mode === "run" ? 0.13 : 0.06);
+        y += (targetY - y) * 0.06;
+      }
+      const dx = targetX - x;
+      if (mode !== "point" && mode !== "float" && Math.abs(dx) > 3) facing = dx < 0;
+      mascot.classList.toggle("flip", facing);
+      mascot.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      positionBubble();
+
+      if (!reduceMotion) {
+        window.requestAnimationFrame(animateMascot);
+      }
+    }
+
+    function scheduleIdleMoment() {
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        if (mode === "idle" && !currentTarget && !rest && !away) {
+          const moments = [
+            { mood: "wave", pose: "", message: "Hey, nice to see you! 👋" },
+            { mood: "happy", pose: "curious", message: "What shall we explore? ✨" },
+            { mood: "happy", pose: "thinking", message: "" },
+            { mood: "laugh", pose: "", message: "Having a happy little day! 😄" },
+            { mood: "happy", pose: "proud", message: "" },
+            { mood: "happy", pose: "dance", message: "A tiny dance break! 🎵" },
+            { mood: "laugh", pose: "", message: "Catch me! 😆", movement: "run", running: true },
+          ];
+          const moment = moments[Math.floor(Math.random() * moments.length)];
+          showMascotMood(
+            moment.mood,
+            moment.message,
+            reduceMotion ? "idle" : moment.movement || "idle",
+            2400,
+            moment.pose,
+            !reduceMotion && Boolean(moment.running)
+          );
+
+          if (moment.message && !reduceMotion) {
+            targetX = Math.random() * Math.max(1, window.innerWidth - size.width);
+            targetY = Math.random() * Math.max(1, window.innerHeight - size.height);
+          }
+        }
+        scheduleIdleMoment();
+      }, 3800 + Math.random() * 2600);
+    }
+
+    showMascotMood("wave", night ? "Working late? 🌙 I'm Labu 👋" : "Hi! I'm Labu 👋", "stay", 4200);
+    scheduleIdleMoment();
+    animateMascot();
+
+    window.addEventListener("pointermove", (event) => {
+      if (event.pointerType === "touch") return;
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      hasPointerPosition = true;
+
+      const rect = mascot.getBoundingClientRect();
+      const angle = Math.atan2(
+        pointerY - (rect.top + rect.height * 0.46),
+        pointerX - (rect.left + rect.width / 2)
+      );
+      mascotPupils.style.transform =
+        `translate(${Math.cos(angle) * 2.6}px, ${Math.sin(angle) * 2}px)`;
+    }, { passive: true });
+    window.addEventListener("scroll", refreshHoverTarget, { passive: true });
+
+    document.addEventListener("pointerdown", (event) => {
+      if (!isOverMascot(event.clientX, event.clientY)) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      reactToMascotClick();
+    }, true);
+
+    document.addEventListener("pointerover", (event) => {
+      if (event.pointerType === "touch") return;
+      updateHoverTarget(getHoverTarget(event.target));
+    });
+
+    document.addEventListener("pointerout", (event) => {
+      if (event.pointerType === "touch") return;
+      const from = getHoverTarget(event.target);
+      const to = getHoverTarget(event.relatedTarget);
+
+      if (from && from !== to && from === currentTarget) {
+        updateHoverTarget(to);
+      }
+    });
+
+    document.addEventListener("focusin", (event) => {
+      updateHoverTarget(getHoverTarget(event.target));
+    });
+
+    document.addEventListener("focusout", (event) => {
+      const from = getHoverTarget(event.target);
+      const to = getHoverTarget(event.relatedTarget);
+
+      if (from && from !== to && from === currentTarget) {
+        updateHoverTarget(to);
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!(event.target instanceof Element)) return;
+      if (event.detail > 0 && isOverMascot(event.clientX, event.clientY)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        return;
+      }
+
+      const element = event.target.closest("[data-labu-say]");
+      if (element) {
+        showMascotMood("laugh", element.dataset.labuSay, "idle", 1800);
+      }
+    }, true);
+
+    mascot.addEventListener("click", reactToMascotClick);
+
+    mascot.addEventListener("focus", () => {
+      mascotBubble.textContent = "Hi! I'm Labu. Press Enter to say hello! 👋";
+      mascotBubble.hidden = false;
+    });
+
+    mascot.addEventListener("blur", () => {
+      mascotBubble.hidden = true;
+    });
+
+    window.addEventListener("resize", () => {
+      const { width, height } = mascotSize();
+      targetX = Math.min(targetX, window.innerWidth - width);
+      targetY = Math.min(targetY, window.innerHeight - height);
+      if (reduceMotion) animateMascot();
+    });
+
+    /* ---- Labu: rest, sleep and page-aware moods ---- */
+    ["pointermove", "pointerdown", "keydown", "wheel", "scroll", "touchstart"].forEach((type) =>
+      window.addEventListener(type, noteActivity, { passive: true, capture: true })
+    );
+
+    const IDLE = {
+      performance: ["sleep", "Quiet by design… 😴"],
+      faq: ["sit", "Take your time with the FAQ 📖"],
+      screenshots: ["sit", "Grab a seat and watch 🍿"],
+      footer: ["sit", "Thanks for visiting! 💖"],
+      download: ["cheer", "Ready when you are! 🎉"]
+    };
+    const ENTER = {
+      intro: ["happy", "Here's the story ✨", "thinking"],
+      features: ["happy", "So many widgets! ✨", "curious"],
+      showcase: ["happy", "Ooh, pretty pictures! 🖼️", "curious"],
+      download: ["laugh", "Ready to download? 🎉", "", true]
+    };
+    const sectionOf = (el) =>
+      el.id || (el.classList.contains("hero") ? "hero" : el.classList.contains("intro") ? "intro" : "footer");
+
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          sectionKey = sectionOf(entry.target);
+          const m = ENTER[sectionKey];
+          if (m && mode === "idle" && !currentTarget && !rest) {
+            showMascotMood(m[0], m[1], "idle", 2400, m[2], Boolean(m[3]) && !reduceMotion);
+          }
+        });
+      }, { rootMargin: "-40% 0px -40% 0px" });
+      document.querySelectorAll("main > section, .site-footer").forEach((el) => io.observe(el));
+    }
+
+    window.setInterval(() => {
+      if (document.hidden || away) return;
+      const idle = Date.now() - lastActivity;
+      const k = night ? 0.7 : 1;
+      const act = IDLE[sectionKey];
+
+      if (!rest && (mode === "idle" || mode === "point") && idle > 3000 * k) {
+        if (act?.[0] === "cheer" && cheers++ < 3) {
+          lastActivity = Date.now() - 1000;
+          showMascotMood("laugh", act[1], "idle", 2400, "dance");
+        } else if (act?.[0] === "sleep") settle("sleep", act[1]);
+        else settle("sit", act?.[1] || "Taking a little break 🪑");
+      } else if (rest === "sit" && idle > 7000 * k) {
+        settle("sleep", "Zzz… 😴");
+      } else if (!rest && idle > 12000) {
+        settle("sleep", "Zzz… 😴");
+      }
+    }, 1000);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) settle("sleep", "");
+      else wake("Welcome back! 👋");
+    });
+    document.documentElement.addEventListener("mouseleave", startAway);
+    document.documentElement.addEventListener("mouseenter", noteActivity);
+    window.addEventListener("offline", () => showMascotMood("sad", "No internet… 😢", "idle", 3000));
+    window.addEventListener("online", () => showMascotMood("laugh", "We're back online! 🎉", "idle", 2200));
+
+    let lastScrollY = window.scrollY;
+    let lastScrollAt = performance.now();
+    window.addEventListener("scroll", () => {
+      const t = performance.now();
+      const speed = Math.abs(window.scrollY - lastScrollY) / Math.max(1, t - lastScrollAt);
+      lastScrollY = window.scrollY;
+      lastScrollAt = t;
+      if (speed > 3 && t - lastDizzy > 7000 && !reduceMotion) {
+        lastDizzy = t;
+        showMascotMood("happy", "Whoa, so fast! 😵", "idle", 1500, "dizzy");
+      }
+    }, { passive: true });
+  }
+
+  /* ---------------------------------------------------------
      PAGE LOAD
   --------------------------------------------------------- */
 

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://nabakrishna.github.io/mosaic-windget/</loc>
+    <image:image><image:loc>https://nabakrishna.github.io/mosaic-windget/assets/og-image.png</image:loc></image:image>
+    <image:image><image:loc>https://nabakrishna.github.io/mosaic-windget/assets/final_look.png</image:loc></image:image>
+    <image:image><image:loc>https://nabakrishna.github.io/mosaic-windget/assets/settings_panel.png</image:loc></image:image>
+    <image:image><image:loc>https://nabakrishna.github.io/mosaic-windget/assets/general.png</image:loc></image:image>
+    <image:image><image:loc>https://nabakrishna.github.io/mosaic-windget/assets/todo.png</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://nabakrishna.github.io/mosaic-windget/privacy.html</loc>
+  </url>
+  <url>
+    <loc>https://nabakrishna.github.io/mosaic-windget/terms.html</loc>
+  </url>
+</urlset>

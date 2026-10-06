@@ -3,9 +3,99 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mosaic — Lightweight Desktop Widgets for Windows</title>
+  <meta name="description" content="Keep tasks, notes, dates and inspiration close with Mosaic, a lightweight, customizable desktop widget for Windows." />
   <meta name="theme-color" content="#f5f4f1" />
-  <meta name="description" content="Mosaic — a lightweight, customizable desktop widget for Windows." />
-  <title>Mosaic</title>
+  <link rel="canonical" href="https://nabakrishna.github.io/mosaic-windget/" />
+  <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:site_name" content="Mosaic" />
+  <meta property="og:title" content="Mosaic — Your desktop, arranged around you." />
+  <meta property="og:description" content="A lightweight Windows desktop widget for your tasks, notes, dates and inspiration." />
+  <meta property="og:url" content="https://nabakrishna.github.io/mosaic-windget/" />
+  <meta property="og:image" content="https://nabakrishna.github.io/mosaic-windget/assets/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Mosaic — Your desktop, arranged around you, with Labu the mascot." />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Mosaic — Your desktop, arranged around you." />
+  <meta name="twitter:description" content="A lightweight Windows desktop widget for your tasks, notes, dates and inspiration." />
+  <meta name="twitter:image" content="https://nabakrishna.github.io/mosaic-windget/assets/og-image.png" />
+  <meta name="twitter:image:alt" content="Mosaic — Your desktop, arranged around you, with Labu the mascot." />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://nabakrishna.github.io/mosaic-windget/#website",
+        "url": "https://nabakrishna.github.io/mosaic-windget/",
+        "name": "Mosaic",
+        "description": "A lightweight, customizable desktop widget for Windows.",
+        "inLanguage": "en"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://nabakrishna.github.io/mosaic-windget/#app",
+        "name": "Mosaic",
+        "url": "https://nabakrishna.github.io/mosaic-windget/",
+        "description": "A lightweight, customizable desktop widget for Windows, with To-Do, Quick Note, Daily Date and Image Box widgets.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Windows",
+        "downloadUrl": "https://github.com/nabakrishna/mosaic-widget/releases/download/v1.0.0/Mosaic.exe",
+        "image": "https://nabakrishna.github.io/mosaic-windget/assets/og-image.png",
+        "isPartOf": {
+          "@id": "https://nabakrishna.github.io/mosaic-windget/#website"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://nabakrishna.github.io/mosaic-windget/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is Mosaic free to use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. The core widgets — To-Do, Quick Note, Daily Date and the Image Box — are free for personal use on Windows."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Mosaic slow down my PC?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Mosaic is built to stay out of your way, targeting around 18 MB of memory and under 1% CPU while idle."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I use my own photos instead of Pinterest?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, the Image Box supports a local folder as a private, offline-friendly source in addition to a live Pinterest feed."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Will Mosaic come to macOS or mobile?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Windows ships first. macOS and mobile companion apps are on the roadmap — see the platform row below for status."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -54,14 +144,14 @@
 
     <nav class="nav-links" aria-label="Main navigation" id="navLinks">
       <a href="https://github.com/nabakrishna/mosaic-widget" target="_blank" rel="noopener">★ Star on GitHub</a>
-      <a href="mailto:you@example.com">Contact</a>
+      <a href="mailto:nabakrishna0111@gmail.com">Contact</a>
     </nav>
 
     <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
       <span></span><span></span><span></span>
     </button>
 
-    <a class="button button-small magnetic" href="https://github.com/nabakrishna/mosaic-widget/releases/download/v1.0.0/Mosaic.exe" data-magnetic>
+    <a class="button button-small magnetic" href="https://github.com/nabakrishna/mosaic-widget/releases/download/v1.0.0/Mosaic.exe" data-magnetic data-labu-tip="Get the latest Mosaic release here! ⬇️" data-labu-say="Thanks for checking out Mosaic! ✨">
       <span>Download for Windows</span><span aria-hidden="true">↗</span>
     </a>
   </header>
@@ -74,8 +164,8 @@
         <h1>Mosaic<br />Your desktop,<br /><em>arranged</em><br />around you.</h1>
         <p class="hero-body">A small, customizable workspace that keeps tasks, notes, dates and inspiration visible — without turning your desktop into a dashboard.</p>
         <div class="hero-actions">
-          <a class="button magnetic" href="https://github.com/nabakrishna/mosaic-widget" data-magnetic>Explore Mosaic <span aria-hidden="true">↗</span></a>
-          <a class="button button-dark magnetic" href="https://github.com/nabakrishna/mosaic-widget/releases/tag/v1.0.0" data-magnetic>Get for Windows <span aria-hidden="true">↗</span></a>
+          <a class="button magnetic" href="https://github.com/nabakrishna/mosaic-widget" data-magnetic data-labu-tip="Take a look around! 🧭" data-labu-say="Let's explore Mosaic! 🧭">Explore Mosaic <span aria-hidden="true">↗</span></a>
+          <a class="button button-dark magnetic" href="https://github.com/nabakrishna/mosaic-widget/releases/tag/v1.0.0" data-magnetic data-labu-tip="Find Mosaic for Windows here! ⬇️" data-labu-say="Hope you enjoy Mosaic! 🎉">Get for Windows <span aria-hidden="true">↗</span></a>
         </div>
       </div>
 
@@ -119,7 +209,7 @@
     </section>
 
     <section class="feature-grid section-shell" id="features">
-      <article class="feature feature-large reveal-card">
+      <article class="feature feature-large reveal-card" data-labu-tip="This is the daily To-Do widget! ✅">
         <div class="feature-copy">
           <p class="eyebrow">01 — DAILY FLOW</p>
           <h3>Keep the day<br /><span>where you can see it.</span></h3>
@@ -143,7 +233,7 @@
         </div>
       </article>
 
-      <article class="feature feature-small reveal-card" id="customize">
+      <article class="feature feature-small reveal-card" id="customize" data-labu-tip="Move things around and make Mosaic yours! ✨">
         <p class="eyebrow">02 — CUSTOMIZATION</p>
         <h3>Move it.<br /><span>Make it yours.</span></h3>
         <p>Reorder your cards, tune the size, pick a theme, and decide which surface lives behind the image box.</p>
@@ -165,7 +255,7 @@
         <button class="text-button" type="button" id="shuffleLayout">Preview reorder ↗</button>
       </article>
 
-      <article class="feature feature-medium reveal-card">
+      <article class="feature feature-medium reveal-card" data-labu-tip="Pin your favorite apps and folders here! 📌">
         <p class="eyebrow">03 — PINNED ITEM</p>
         <h3>One click<br /><span>away.</span></h3>
         <p>Keep a project, folder or app close without opening another launcher or cluttering the taskbar.</p>
@@ -176,7 +266,7 @@
         </div>
       </article>
 
-      <article class="feature feature-medium reveal-card">
+      <article class="feature feature-medium reveal-card" data-labu-tip="Keep special plans close by! 🌟">
         <p class="eyebrow">04 — SPECIAL ACTIVITY</p>
         <h3>Make room<br /><span>for what matters.</span></h3>
         <p>Assign an activity to a date and let Mosaic surface it at the right moment instead of leaving it buried in a list.</p>
@@ -273,27 +363,6 @@
       </div>
     </section>
 
-    <!-- <section class="testimonials section-shell" data-reveal>
-      <div class="testimonials-head">
-        <p class="eyebrow">WHAT PEOPLE SAY</p>
-        <h2>Loved by desktop<br /><span>tinkerers.</span></h2>
-      </div>
-      <div class="testimonial-grid">
-        <article class="testimonial-card">
-          <p>"I used to keep ten browser tabs open just to remember my day. Mosaic replaced all of it with four small cards I actually look at."</p>
-          <div class="testimonial-person"><span class="avatar">A</span><div><strong>Alex R.</strong><small>Indie Developer</small></div></div>
-        </article>
-        <article class="testimonial-card">
-          <p>"The image box alone sold me. Fresh Pinterest pulls every few minutes make my desktop feel alive instead of static."</p>
-          <div class="testimonial-person"><span class="avatar">M</span><div><strong>Maya T.</strong><small>Product Designer</small></div></div>
-        </article>
-        <article class="testimonial-card">
-          <p>"Lightweight is not a marketing word here — it genuinely sits under 1% CPU on my old laptop and I forget it's running."</p>
-          <div class="testimonial-person"><span class="avatar">S</span><div><strong>Sam K.</strong><small>Software Engineer</small></div></div>
-        </article>
-      </div>
-    </section> -->
-
     <section class="faq section-shell" id="faq" data-reveal>
       <div class="faq-head">
         <p class="eyebrow">FAQ</p>
@@ -332,6 +401,31 @@
       <div class="cta-orbit orbit-three"></div>
     </section>
   </main>
+
+  <button class="labu-mascot" id="labu-mascot" type="button" data-m="happy" aria-label="Labu the mascot">
+    <span class="labu-bubble" id="labu-bubble" hidden></span>
+    <span class="labu-zzz" aria-hidden="true"><i>z</i><i>z</i><i>Z</i></span>
+    <span class="labu-wrap">
+      <img src="assets/labu.png" alt="" draggable="false" />
+      <svg class="labu-expression" viewBox="0 0 186 248" aria-hidden="true">
+        <defs><filter id="labu-blur"><feGaussianBlur stdDeviation=".7"/></filter></defs>
+        <g class="labu-eyes-closed" stroke="#f6dbca" stroke-width="5.5" stroke-linecap="round"><path d="M56 102 L78 108M97 105 L118 96"/></g>
+        <g class="labu-sad-mouth" filter="url(#labu-blur)"><path d="M41 127 L47 131 L54 138 L68 144 L83 145 L97 144 L109 139 L120 132 L127 125 L132 117 L135 111 L141 118 L137 128 L131 135 L121 143 L108 149 L96 153 L84 155 L68 153 L55 148 L45 141 L40 135Z" fill="#f2d8c6"/></g>
+        <g class="labu-asleep"><g filter="url(#labu-blur)" fill="#f5d9c8"><ellipse cx="66.6" cy="121.5" rx="14.4" ry="18"/><ellipse cx="110.4" cy="117.8" rx="14.4" ry="18"/></g><path d="M57 124 Q67 131 77 124M100 120 Q110 127 120 120" stroke="#4a2519" stroke-width="2" stroke-linecap="round" fill="none"/></g>
+        <g class="labu-sit" stroke="#6e3a3e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M56 214 L127 214 Q128 233 92 234 Q56 233 56 214Z" fill="#e6a69e" stroke="none"/><path d="M57 216 Q57 233 92 234 Q127 233 126 216" fill="none"/><g fill="#f6dccb"><ellipse cx="66" cy="237" rx="12" ry="6.5" transform="rotate(-12 66 237)"/><ellipse cx="118" cy="237" rx="12" ry="6.5" transform="rotate(12 118 237)"/></g><path d="M58 236 l-1 4M66 237 l0 4M74 236 l1 4M110 236 l-1 4M118 237 l0 4M126 236 l1 4" fill="none"/></g>
+        <g class="labu-pupils">
+          <g transform="translate(67.3 121.5)"><ellipse rx="6.9" ry="11" fill="#3e2118"/><ellipse rx="6" ry="10.1" fill="#6a3a28"/><ellipse rx="4.1" ry="6.4" fill="#1d0f0a"/><circle cx="-2" cy="-4.5" r="2.1" fill="#fff"/><circle cx="2" cy="3.5" r="1" fill="#fff"/></g>
+          <g transform="translate(110 118.1)"><ellipse rx="7.6" ry="11.2" fill="#3e2118"/><ellipse rx="6.7" ry="10.3" fill="#6a3a28"/><ellipse rx="4.6" ry="6.5" fill="#1d0f0a"/><circle cx="-2" cy="-4.5" r="2.1" fill="#fff"/><circle cx="2" cy="3.5" r="1" fill="#fff"/></g>
+        </g>
+        <g class="labu-smile" stroke="#4a2519" stroke-width="1.7" stroke-linecap="round" fill="none"><path d="M57 105 Q67 98 77 102M98 101 Q108 94 118 99"/></g>
+        <g class="labu-sad-face" stroke="#4a2519" stroke-width="1.8" stroke-linecap="round" fill="none"><path d="M57 108 L77 99M98 99 L118 107"/><path d="M64 150 Q84 140 104 150" stroke-width="2"/></g>
+        <g class="labu-tears"><path d="M60 134 q-3.5 7 0 9.5 q3.5 -2.5 0 -9.5Z" fill="#7ec8ff" stroke="#4aa0e0" stroke-width=".8"/><path d="M116 131 q-3.5 7 0 9.5 q3.5 -2.5 0 -9.5Z" fill="#7ec8ff" stroke="#4aa0e0" stroke-width=".8"/></g>
+        <g class="labu-sparkles"><ellipse cx="45" cy="124" rx="8" ry="5" fill="#ff7f8a" opacity=".4"/><ellipse cx="131" cy="112" rx="8" ry="5" fill="#ff7f8a" opacity=".4"/><path d="M14 81 L16 86 L21 88 L16 90 L14 95 L12 90 L7 88 L12 86Z M172 73 L174 78 L179 80 L174 82 L172 87 L170 82 L165 80 L170 78Z M160 33 L162 38 L167 40 L162 42 L160 47 L158 42 L153 40 L158 38Z" fill="#ffd24a"/></g>
+        <g class="labu-pointing"><path d="M148 153 L174 144" stroke="#6e3a3e" stroke-width="9" stroke-linecap="round"/><path d="M148 153 L174 144" stroke="#f3d8c6" stroke-width="6.5" stroke-linecap="round"/></g>
+        <g class="labu-wave" stroke="#b8707a" stroke-width="1.8" fill="none" stroke-linecap="round"><path d="M160 138 Q168 146 160 154"/><path d="M167 134 Q177 146 167 158"/></g>
+      </svg>
+    </span>
+  </button>
 
   <footer class="site-footer section-shell">
     <div class="footer-brand">
